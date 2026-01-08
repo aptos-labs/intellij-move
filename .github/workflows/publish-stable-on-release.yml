@@ -8,7 +8,7 @@ jobs:
     publish-release:
         strategy:
             matrix:
-                gradle-properties-version: [ 251, 252 ]
+                gradle-properties-version: [ 253 ]
 
         runs-on: ubuntu-latest
         env:
