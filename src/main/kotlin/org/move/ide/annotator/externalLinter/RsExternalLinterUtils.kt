@@ -200,7 +200,6 @@ fun MutableList<HighlightInfo>.addHighlightsForFile(
             .description(if (isUnitTestMode) APTOS_TEST_MESSAGE else compilerError.message)
             .escapedToolTip(compilerError.htmlTooltip)
             .range(compilerError.textRange)
-            .needsUpdateOnTyping(true)
 
         highlightBuilder.create()?.let(::add)
     }

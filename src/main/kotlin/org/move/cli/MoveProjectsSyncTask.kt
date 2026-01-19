@@ -10,6 +10,7 @@ import com.intellij.build.events.BuildEventsNls
 import com.intellij.build.events.MessageEvent
 import com.intellij.build.progress.BuildProgress
 import com.intellij.build.progress.BuildProgressDescriptor
+import com.intellij.execution.process.ProcessOutputType
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionManager
@@ -293,7 +294,7 @@ class MoveProjectsSyncTask(
                 syncContext.syncProgress.output(
                     "${dep.name} dependency loaded successfully, " +
                             "\npackage directory: \n${depRoot.presentableUrl}",
-                    true,
+                    ProcessOutputType.STDOUT,
                 )
                 syncContext.syncProgress.newline()
                 syncContext.syncProgress.newline()
@@ -346,7 +347,7 @@ private fun BuildProgress<BuildProgressDescriptor>.info(
 }
 
 private fun BuildProgress<BuildProgressDescriptor>.newline() {
-    output("\n", true)
+    output("\n", ProcessOutputType.STDOUT)
 }
 
 
