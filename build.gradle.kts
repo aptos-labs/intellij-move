@@ -30,7 +30,7 @@ version = pluginVersion
 
 plugins {
     id("java")
-    kotlin("jvm") version "2.2.20"
+    kotlin("jvm") version "2.3.0"
     id("org.jetbrains.intellij.platform") version "2.10.5"
     id("org.jetbrains.grammarkit") version "2023.3.0.1"
     id("net.saliman.properties") version "1.5.2"
@@ -155,8 +155,8 @@ allprojects {
         }
         compileKotlin {
             compilerOptions {
-                languageVersion.set(KotlinVersion.KOTLIN_2_1)
-                apiVersion.set(KotlinVersion.KOTLIN_2_1)
+                languageVersion.set(KotlinVersion.KOTLIN_2_2)
+                apiVersion.set(KotlinVersion.KOTLIN_2_2)
                 freeCompilerArgs.add("-Xjvm-default=all")
             }
         }
