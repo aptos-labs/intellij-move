@@ -73,8 +73,7 @@ abstract class MvAptosEditorNotificationProvider(project: Project): MvNotificati
         if (isUnitTestMode) return null
 
         if (!enableForScratchFiles && ScratchUtil.isScratch(file)) return null
-        @Suppress("UnstableApiUsage")
-        if (!project.isTrusted()) return null
+        if (!TrustedProjects.isProjectTrusted(project)) return null
 
         // only run for .move or Move.toml files
         if (!file.isMoveFile && !file.isMoveTomlManifestFile) return null

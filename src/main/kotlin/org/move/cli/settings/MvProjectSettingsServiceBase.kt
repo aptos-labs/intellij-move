@@ -77,7 +77,7 @@ abstract class MvProjectSettingsServiceBase<T: MvProjectSettingsBase<T>>(
         project.messageBus.syncPublisher(MOVE_SETTINGS_TOPIC).settingsChanged(event)
 
         if (event.affectsHighlighting) {
-            DaemonCodeAnalyzer.getInstance(project).restart()
+            DaemonCodeAnalyzer.getInstance(project).restart("one of settings affecting highlighting has been changed")
         }
 
         if (event.affectsParseTree) {
