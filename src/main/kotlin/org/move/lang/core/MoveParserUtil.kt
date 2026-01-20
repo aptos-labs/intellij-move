@@ -341,10 +341,14 @@ object MoveParserUtil: GeneratedParserUtilBase() {
         return result
     }
 
-    @Suppress("FunctionName")
     @JvmStatic
     fun vectorIdent(b: PsiBuilder, level: Int): Boolean {
         return nextTokenIs(b, "vector") && consumeToken(b, IDENTIFIER)
+    }
+
+    @JvmStatic
+    fun noPrevWs(b: PsiBuilder, level: Int): Boolean {
+        return b.rawLookup(-1) != WHITE_SPACE
     }
 
     @JvmStatic
