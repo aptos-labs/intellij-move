@@ -684,6 +684,7 @@ TypeArgumentList ::= TypeArgumentListImpl {
     name = "type arguments"
 }
 ColonTypeArgumentList ::= &'::' TypeArgumentListImpl { elementType = TypeArgumentList }
+NoWsTypeArgumentList ::= <<noPrevWs>> TypeArgumentListImpl { elementType = TypeArgumentListImpl }
 
 //private TypeArgumentListImpl ::= '::'? '<' !'=' TypeArgumentImpl* '>' { pin = 3 }
 //private TypeArgumentImpl ::= !'>' TypeArgument (',' | &'>') { pin = 2 }
@@ -1201,7 +1202,7 @@ private ForbiddenFieldLookupLast ::= '::' | '(' | '{' | '!'
   consumeTokenMethod = "consumeTokenFast"
 }
 
-MethodCall ::= IDENTIFIER ColonTypeArgumentList? ValueArgumentList
+MethodCall ::= IDENTIFIER (ColonTypeArgumentList | NoWsTypeArgumentList)? ValueArgumentList
 {
     implements = [
         "org.move.lang.core.psi.ext.MvMethodOrField"

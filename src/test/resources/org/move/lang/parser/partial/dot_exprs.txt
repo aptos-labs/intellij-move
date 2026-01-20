@@ -197,7 +197,7 @@ FILE
                     PsiElement(IDENTIFIER)('bin')
                 PsiElement(.)('.')
                 MvFieldLookupImpl(FIELD_LOOKUP)
-                  PsiElement(IDENTIFIER)('no_type_args_without_colon_colon')
+                  PsiElement(IDENTIFIER)('type_args_without_colon_colon')
               MvBinaryOpImpl(BINARY_OP)
                 PsiElement(<)('<')
               MvPathExprImpl(PATH_EXPR)
@@ -205,7 +205,7 @@ FILE
                   PsiElement(IDENTIFIER)('u8')
             MvBinaryOpImpl(BINARY_OP)
               PsiElement(>)('>')
-            PsiErrorElement:<expression> expected, got ';'
+            PsiErrorElement:'(' or <expression> expected, got ';'
               <empty list>
           PsiElement(;)(';')
         PsiWhiteSpace('\n    ')

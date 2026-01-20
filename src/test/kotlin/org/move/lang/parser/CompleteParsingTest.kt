@@ -64,6 +64,7 @@ class CompleteParsingTest: MvParsingTestCase("complete") {
     fun `test lambdas`() = doTest()
 //    fun `test new lambdas`() = doTest()
     fun `test signed integers`() = doTest()
+    fun `test no turbofish method call`() = doTest()
 
     fun doTest() {
         super.doTest(true, true)
