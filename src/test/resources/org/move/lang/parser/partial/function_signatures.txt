@@ -88,28 +88,19 @@ FILE
     MvFunctionImpl(FUNCTION)
       MvVisibilityModifierImpl(VISIBILITY_MODIFIER)
         PsiElement(public)('public')
-      PsiErrorElement:'(' or fun expected, got 'public'
-        <empty list>
-    PsiWhiteSpace('\n    ')
-    MvFunctionImpl(FUNCTION)
+      PsiWhiteSpace('\n    ')
       MvVisibilityModifierImpl(VISIBILITY_MODIFIER)
         PsiElement(public)('public')
         PsiElement(()('(')
         PsiElement(friend_kw)('friend')
         PsiElement())(')')
-      PsiErrorElement:fun expected, got 'public'
-        <empty list>
-    PsiWhiteSpace('\n    ')
-    MvFunctionImpl(FUNCTION)
+      PsiWhiteSpace('\n    ')
       MvVisibilityModifierImpl(VISIBILITY_MODIFIER)
         PsiElement(public)('public')
         PsiElement(()('(')
         PsiElement(script_kw)('script')
         PsiElement())(')')
-      PsiErrorElement:fun expected, got 'public'
-        <empty list>
-    PsiWhiteSpace('\n    ')
-    MvFunctionImpl(FUNCTION)
+      PsiWhiteSpace('\n    ')
       MvVisibilityModifierImpl(VISIBILITY_MODIFIER)
         PsiElement(public)('public')
       PsiWhiteSpace(' ')
@@ -117,42 +108,25 @@ FILE
       PsiErrorElement:IDENTIFIER expected, got 'native'
         <empty list>
     PsiWhiteSpace('\n\n    ')
-    MvFunctionImpl(FUNCTION)
-      PsiElement(native)('native')
-      PsiErrorElement:fun expected, got 'fu'
-        <empty list>
-      PsiWhiteSpace(' ')
+    PsiElement(native)('native')
+    PsiWhiteSpace(' ')
+    PsiErrorElement:fun expected, got 'fu'
       PsiElement(IDENTIFIER)('fu')
-      PsiErrorElement:'(' or <type parameters> expected, got 'public'
-        <empty list>
     PsiWhiteSpace('\n    ')
-    MvFunctionImpl(FUNCTION)
-      MvVisibilityModifierImpl(VISIBILITY_MODIFIER)
-        PsiElement(public)('public')
-      PsiErrorElement:'(' or fun expected, got 'fu'
-        <empty list>
-      PsiWhiteSpace(' ')
+    PsiElement(public)('public')
+    PsiWhiteSpace(' ')
+    PsiErrorElement:'(', fun or struct_kw expected, got 'fu'
       PsiElement(IDENTIFIER)('fu')
-      PsiErrorElement:'(' or <type parameters> expected, got 'entry'
-        <empty list>
     PsiWhiteSpace('\n    ')
-    MvFunctionImpl(FUNCTION)
-      PsiElement(entry_kw)('entry')
-      PsiErrorElement:fun expected, got 'fu'
-        <empty list>
-      PsiWhiteSpace(' ')
+    PsiElement(entry_kw)('entry')
+    PsiWhiteSpace(' ')
+    PsiErrorElement:fun expected, got 'fu'
       PsiElement(IDENTIFIER)('fu')
-      PsiErrorElement:'(' or <type parameters> expected, got 'inline'
-        <empty list>
     PsiWhiteSpace('\n    ')
-    MvFunctionImpl(FUNCTION)
-      PsiElement(inline_kw)('inline')
-      PsiErrorElement:fun expected, got 'fu'
-        <empty list>
-      PsiWhiteSpace(' ')
+    PsiElement(inline_kw)('inline')
+    PsiWhiteSpace(' ')
+    PsiErrorElement:fun expected, got 'fu'
       PsiElement(IDENTIFIER)('fu')
-      PsiErrorElement:'(' or <type parameters> expected, got 'fun'
-        <empty list>
     PsiWhiteSpace('\n\n    ')
     MvFunctionImpl(FUNCTION)
       PsiElement(fun)('fun')
@@ -171,10 +145,7 @@ FILE
       PsiWhiteSpace(' ')
       MvVisibilityModifierImpl(VISIBILITY_MODIFIER)
         PsiElement(public)('public')
-      PsiErrorElement:'(' or fun expected, got 'native'
-        <empty list>
-    PsiWhiteSpace('\n    ')
-    MvFunctionImpl(FUNCTION)
+      PsiWhiteSpace('\n    ')
       PsiElement(native)('native')
       PsiWhiteSpace(' ')
       MvVisibilityModifierImpl(VISIBILITY_MODIFIER)
@@ -182,10 +153,7 @@ FILE
         PsiElement(()('(')
         PsiElement(friend_kw)('friend')
         PsiElement())(')')
-      PsiErrorElement:fun expected, got 'native'
-        <empty list>
-    PsiWhiteSpace('\n    ')
-    MvFunctionImpl(FUNCTION)
+      PsiWhiteSpace('\n    ')
       PsiElement(native)('native')
       PsiWhiteSpace(' ')
       MvVisibilityModifierImpl(VISIBILITY_MODIFIER)
@@ -193,10 +161,7 @@ FILE
         PsiElement(()('(')
         PsiElement(script_kw)('script')
         PsiElement())(')')
-      PsiErrorElement:fun expected, got 'native'
-        <empty list>
-    PsiWhiteSpace('\n    ')
-    MvFunctionImpl(FUNCTION)
+      PsiWhiteSpace('\n    ')
       PsiElement(native)('native')
       PsiWhiteSpace(' ')
       MvVisibilityModifierImpl(VISIBILITY_MODIFIER)
@@ -206,14 +171,10 @@ FILE
       PsiErrorElement:IDENTIFIER expected, got 'native'
         <empty list>
     PsiWhiteSpace('\n\n    ')
-    MvFunctionImpl(FUNCTION)
-      PsiElement(native)('native')
-      PsiErrorElement:fun expected, got 'pub'
-        <empty list>
-      PsiWhiteSpace(' ')
+    PsiElement(native)('native')
+    PsiWhiteSpace(' ')
+    PsiErrorElement:fun expected, got 'pub'
       PsiElement(IDENTIFIER)('pub')
-      PsiErrorElement:'(' or <type parameters> expected, got 'fun'
-        <empty list>
     PsiWhiteSpace('\n    ')
     MvFunctionImpl(FUNCTION)
       PsiElement(fun)('fun')
@@ -222,9 +183,7 @@ FILE
       MvFunctionParameterListImpl(FUNCTION_PARAMETER_LIST)
         PsiElement(()('(')
         PsiElement())(')')
-      PsiErrorElement:'{' expected, got ';'
-        <empty list>
-    PsiElement(;)(';')
+      PsiElement(;)(';')
     PsiWhiteSpace('\n\n    ')
     MvFunctionImpl(FUNCTION)
       PsiElement(fun)('fun')

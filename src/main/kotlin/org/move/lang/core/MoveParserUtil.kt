@@ -219,6 +219,55 @@ object MoveParserUtil: GeneratedParserUtilBase() {
     fun includeStmtModeTrue(b: PsiBuilder, level: Int): Boolean = BitUtil.isSet(b.flags, INCLUDE_STMT_MODE)
 
     @JvmStatic
+    fun functionModifiers(
+        b: PsiBuilder,
+        level: Int,
+        visParser: Parser,
+    ): Boolean {
+        var encountered = false
+        while (!b.eof()) {
+            when {
+                b.tokenType == PUBLIC
+                        || isContextualKeyword(b, "friend", FRIEND)
+                        || isContextualKeyword(b, "package", PACKAGE) -> {
+//                    if (FunModifier.VIS !in modifiersLeft) return isParsed()
+                    if (!visParser.parse(b, level)) return false
+//                    modifiersLeft.remove(FunModifier.VIS)
+                    encountered = true
+                }
+                b.tokenType == NATIVE -> {
+//                    if (FunModifier.NATIVE !in modifiersLeft) return isParsed()
+//                    modifiersLeft.remove(FunModifier.NATIVE)
+//                    nativeEncountered = true
+                    encountered = true
+                    b.advanceLexer()
+                }
+                entryKeyword(b, level) -> {
+//                    if (FunModifier.ENTRY !in modifiersLeft) return isParsed()
+//                    modifiersLeft.remove(FunModifier.ENTRY)
+                    encountered = true
+                }
+                inlineKeyword(b, level) -> {
+//                    if (FunModifier.INLINE !in modifiersLeft) return isParsed()
+//                    modifiersLeft.remove(FunModifier.INLINE)
+                    encountered = true
+                }
+                else -> {
+                    break
+                }
+            }
+        }
+        return encountered
+//
+//        return innerFunctionModifierSet(
+//            b,
+//            level,
+//            visParser,
+//            native = false
+//        )
+    }
+
+    @JvmStatic
     fun functionModifierSet(
         b: PsiBuilder,
         level: Int,
