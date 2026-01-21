@@ -1066,7 +1066,7 @@ upper TupleLitExprUpper ::= ',' [ Expr (',' Expr)* ','? ] ')' {
     elementType = TupleLitExpr
 }
 
-LambdaExpr ::= LambdaParameterList Expr?
+LambdaExpr ::= LambdaParameterList Expr? SpecBlockExpr?
 {
     pin = 1
 }
@@ -1427,6 +1427,11 @@ Schema ::= Attr* (spec schema) IDENTIFIER TypeParameterList? <<msl SpecCodeBlock
     hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
 }
 
+//SpecBlock ::= spec <<msl SpecCodeBlock>> {
+//    implements = [
+//        "org.move.lang.core.psi.ScopeMslOnlyElement"
+//    ]
+//}
 SpecBlockExpr ::= spec <<msl SpecCodeBlock>> {
     implements = [
         "org.move.lang.core.psi.ScopeMslOnlyElement"

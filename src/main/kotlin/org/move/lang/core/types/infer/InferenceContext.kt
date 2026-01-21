@@ -197,6 +197,10 @@ class InferenceContext(
                     inference.inferExprType(it)
                 }
             }
+            val inlineSpecBlock = lambdaExpr.specExpr
+            if (inlineSpecBlock != null) {
+                inference.inferSpecBlockExprTy(inlineSpecBlock)
+            }
         }
 
         unifyRemainingIntVarsIntoInteger(exprTypes.values + patTypes.values)

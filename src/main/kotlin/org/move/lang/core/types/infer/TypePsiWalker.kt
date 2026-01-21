@@ -401,7 +401,6 @@ class TypePsiWalker(
     }
 
     private fun inferLambdaExprTy(lambdaExpr: MvLambdaExpr, expected: Expected): Ty {
-
         val paramTys = lambdaExpr.lambdaParameters.map {
             val paramTy = it.type?.loweredType(ctx.msl) ?: TyInfer.TyVar()
             ctx.writePatTy(it.patBinding, paramTy)
@@ -686,7 +685,7 @@ class TypePsiWalker(
         return TyUnit
     }
 
-    private fun inferSpecBlockExprTy(specBlockExpr: MvSpecBlockExpr): Ty {
+    fun inferSpecBlockExprTy(specBlockExpr: MvSpecBlockExpr): Ty {
         val specBlock = specBlockExpr.specBlock
         if (specBlock != null) {
             inferSpecBlock(specBlock)
@@ -1184,6 +1183,10 @@ class TypePsiWalker(
         if (conditionExpr != null) {
             conditionExpr.inferTypeCoercableTo(TyBool)
         }
+        val inlineSpecBlock = whileExpr.specBlockExpr
+        if (inlineSpecBlock != null) {
+            inferSpecBlockExprTy(inlineSpecBlock)
+        }
         return inferLoopLikeBlock(whileExpr)
     }
 
@@ -1205,6 +1208,11 @@ class TypePsiWalker(
             val bindingPat = iterCondition.patBinding
             if (bindingPat != null) {
                 this.ctx.writePatTy(bindingPat, bindingTy)
+            }
+
+            val innerSpecBlock = iterCondition.specExpr
+            if (innerSpecBlock != null) {
+                inferSpecBlockExprTy(innerSpecBlock)
             }
         }
         return inferLoopLikeBlock(forExpr)
