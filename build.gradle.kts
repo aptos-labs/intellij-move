@@ -17,7 +17,7 @@ fun prop(name: String): String =
 
 val shortPlatformVersion = prop("shortPlatformVersion")
 val createUseInstaller = prop("useInstaller").toBooleanStrict()
-val codeVersion = "1.49.0"
+val codeVersion = "1.50.0"
 
 val pluginVersion = "$codeVersion.$shortPlatformVersion"
 val pluginGroup = "org.move"
@@ -112,15 +112,15 @@ allprojects {
             }
 
 //            val codeVersionForUrl = codeVersion.replace('.', '-')
-            changeNotes.set(
-                """
-    <body>
-        <p><a href="https://github.com/pontem-network/intellij-move/releases/tag/v$codeVersion">
-            Changelog for the Intellij-Move $codeVersion
-            </a></p>
-    </body>
-            """
-            )
+//            changeNotes.set(
+//                """
+//    <body>
+//        <p><a href="https://github.com/pontem-network/intellij-move/releases/tag/v$codeVersion">
+//            Changelog for the Intellij-Move $codeVersion
+//            </a></p>
+//    </body>
+//            """
+//            )
         }
 
         instrumentCode.set(false)
