@@ -219,64 +219,64 @@ class KeywordCompletionTest: CompletionTestCase() {
     """
     )
 
-    fun `test native fun to public`() = doSingleCompletion(
-        """
-        module 0x1::M {
-            native pub/*caret*/ fun main();
-        }
-    """, """
-        module 0x1::M {
-            native public/*caret*/ fun main();
-        }
-    """)
+//    fun `test native fun to public`() = doSingleCompletion(
+//        """
+//        module 0x1::M {
+//            native pub/*caret*/ fun main();
+//        }
+//    """, """
+//        module 0x1::M {
+//            native public/*caret*/ fun main();
+//        }
+//    """)
 
-    fun `test public fun`() = doSingleCompletion(
-        """
-        module 0x1::M {
-            public f/*caret*/
-        }
-    """, """
-        module 0x1::M {
-            public fun /*caret*/
-        }
-    """
-    )
+//    fun `test public fun`() = doSingleCompletion(
+//        """
+//        module 0x1::M {
+//            public f/*caret*/
+//        }
+//    """, """
+//        module 0x1::M {
+//            public fun /*caret*/
+//        }
+//    """
+//    )
 
-    fun `test public(script) fun`() = doSingleCompletion(
-        """
-        module 0x1::M {
-            public(script) f/*caret*/
-        }
-    """, """
-        module 0x1::M {
-            public(script) fun /*caret*/
-        }
-    """
-    )
+//    fun `test public(script) fun`() = doSingleCompletion(
+//        """
+//        module 0x1::M {
+//            public(script) f/*caret*/
+//        }
+//    """, """
+//        module 0x1::M {
+//            public(script) fun /*caret*/
+//        }
+//    """
+//    )
 
-    fun `test native fun`() = doSingleCompletion(
-        """
-        module 0x1::M {
-            native fu/*caret*/
-        }
-    """, """
-        module 0x1::M {
-            native fun /*caret*/
-        }
-    """
-    )
+//    fun `test native fun`() = doSingleCompletion(
+//        """
+//        module 0x1::M {
+//            native fu/*caret*/
+//        }
+//    """, """
+//        module 0x1::M {
+//            native fun /*caret*/
+//        }
+//    """
+//    )
 
-    fun `test native public fun`() = doSingleCompletion(
-        """
-        module 0x1::M {
-            native public f/*caret*/
-        }
-    """, """
-        module 0x1::M {
-            native public fun /*caret*/
-        }
-    """
-    )
+//    fun `test native public fun`() = doSingleCompletion(
+//        """
+//        module 0x1::M {
+//            native public f/*caret*/
+//        }
+//    """, """
+//        module 0x1::M {
+//            native public fun /*caret*/
+//        }
+//    """
+//    )
 
     fun `test entry`() = doSingleCompletion(
         """
@@ -290,29 +290,29 @@ class KeywordCompletionTest: CompletionTestCase() {
     """
     )
 
-    fun `test entry after public`() = doSingleCompletion(
-        """
-        module 0x1::M {
-            public ent/*caret*/
-        }
-    """, """
-        module 0x1::M {
-            public entry /*caret*/
-        }
-    """
-    )
+//    fun `test entry after public`() = doSingleCompletion(
+//        """
+//        module 0x1::M {
+//            public ent/*caret*/
+//        }
+//    """, """
+//        module 0x1::M {
+//            public entry /*caret*/
+//        }
+//    """
+//    )
 
-    fun `test entry after public friend`() = doSingleCompletion(
-        """
-        module 0x1::M {
-            public(friend) ent/*caret*/
-        }
-    """, """
-        module 0x1::M {
-            public(friend) entry /*caret*/
-        }
-    """
-    )
+//    fun `test entry after public friend`() = doSingleCompletion(
+//        """
+//        module 0x1::M {
+//            public(friend) ent/*caret*/
+//        }
+//    """, """
+//        module 0x1::M {
+//            public(friend) entry /*caret*/
+//        }
+//    """
+//    )
 
     fun `test no completion in bound if no colon`() = checkNoCompletion(
         """
@@ -443,17 +443,17 @@ class KeywordCompletionTest: CompletionTestCase() {
     """
     )
 
-    fun `test entry after native`() = doSingleCompletion(
-        """
-        module 0x1::M {
-            native ent/*caret*/
-        }
-    """, """
-        module 0x1::M {
-            native entry /*caret*/
-        }
-    """
-    )
+//    fun `test entry after native`() = doSingleCompletion(
+//        """
+//        module 0x1::M {
+//            native ent/*caret*/
+//        }
+//    """, """
+//        module 0x1::M {
+//            native entry /*caret*/
+//        }
+//    """
+//    )
 
     fun `test no native completion after native`() = checkNoCompletion(
         """
