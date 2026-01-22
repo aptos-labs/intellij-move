@@ -17,7 +17,7 @@ fun prop(name: String): String =
 
 val shortPlatformVersion = prop("shortPlatformVersion")
 val createUseInstaller = prop("useInstaller").toBooleanStrict()
-val codeVersion = "1.49.0"
+val codeVersion = "1.50.0"
 
 val pluginVersion = "$codeVersion.$shortPlatformVersion"
 val pluginGroup = "org.move"
