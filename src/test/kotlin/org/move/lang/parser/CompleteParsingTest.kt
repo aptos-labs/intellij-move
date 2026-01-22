@@ -67,6 +67,9 @@ class CompleteParsingTest: MvParsingTestCase("complete") {
     fun `test no turbofish method call`() = doTest()
     fun `test spec block with lambdas`() = doTest()
 
+    fun `test public struct`() = doTest()
+    fun `test public enum`() = doTest()
+
     fun doTest() {
         super.doTest(true, true)
     }

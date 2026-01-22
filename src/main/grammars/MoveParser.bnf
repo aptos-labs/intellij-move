@@ -362,11 +362,11 @@ SpecInlineFunctionStmt ::= SpecInlineFunctionInner
     ]
 }
 
-Struct ::= Attr* STRUCT_KW IDENTIFIER TypeParameterList?
+Struct ::= Attr* VisibilityModifier? STRUCT_KW IDENTIFIER TypeParameterList?
             // abilities are at the beginning or at the end
             AbilitiesList? ( TupleStructTail | BlockStructTail )
 {
-    pin = 2
+    pin = 3
     implements = [
         "org.move.lang.core.psi.ext.MvStructOrEnumItemElement"
         "org.move.lang.core.psi.ext.MvFieldsOwner"
@@ -398,7 +398,8 @@ private UnitStructTail ::= AbilitiesList? ';'
 //}
 //private StructItem ::= StructInner
 
-Enum ::= Attr* enum IDENTIFIER TypeParameterList? AbilitiesList? EnumBody (AbilitiesList ';')?
+Enum ::= Attr* VisibilityModifier? enum IDENTIFIER
+            TypeParameterList? AbilitiesList? EnumBody (AbilitiesList ';')?
 {
     pin = "enum"
     implements = [
@@ -439,25 +440,25 @@ fake Function ::= Attr* native? VisibilityModifier? entry? inline?
     hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
 }
 
-private FunctionInnerVisFirst ::= FunctionModifierSetInner fun { pin = 1 }
+private FunctionInnerVisFirst ::= FunctionModifierSetInner? fun
 private FunctionInnerNoVisFirst ::= fun
-private FunctionInnerFirst ::= FunctionInnerVisFirst | FunctionInnerNoVisFirst
+private FunctionInnerFirst ::= FunctionInnerVisFirst
 
-FunctionInner ::= Attr* FunctionInnerFirst FunctionSignatureInner CodeBlock
+FunctionInner ::= Attr* FunctionModifiers? fun FunctionSignatureInner (CodeBlock | ';')
 {
-    pin = FunctionInnerFirst
+    pin = "fun"
     elementType = Function
     hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
 }
 
-NativeFunctionInner ::= Attr* NativeFunctionModifierSetInner fun FunctionSignatureInner ';'
+NativeFunctionInner ::= Attr* FunctionModifiers? fun FunctionSignatureInner ';'
 {
-    pin = NativeFunctionModifierSetInner
+    pin = "fun"
     elementType = Function
     hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
 }
 
-private FunctionItem ::= NativeFunctionInner | FunctionInner
+private FunctionItem ::= FunctionInner
 
 private FunctionSignatureInner ::= IDENTIFIER TypeParameterList?
                                     FunctionParameterList ReturnType? AcquiresType?
@@ -475,6 +476,7 @@ private for ::= <<forKeyword>>
 private AttrsAndVis_first ::= '#'
 //private AttrsAndVis_first ::= '#' | public
 
+private FunctionModifiers ::= <<functionModifiers VisibilityModifier>>
 private FunctionModifierSetInner ::= <<functionModifierSet VisibilityModifier>>
 private NativeFunctionModifierSetInner ::= <<nativeFunctionModifierSet VisibilityModifier>>
 
