@@ -112,15 +112,15 @@ allprojects {
             }
 
 //            val codeVersionForUrl = codeVersion.replace('.', '-')
-            changeNotes.set(
-                """
-    <body>
-        <p><a href="https://github.com/pontem-network/intellij-move/releases/tag/v$codeVersion">
-            Changelog for the Intellij-Move $codeVersion
-            </a></p>
-    </body>
-            """
-            )
+//            changeNotes.set(
+//                """
+//    <body>
+//        <p><a href="https://github.com/pontem-network/intellij-move/releases/tag/v$codeVersion">
+//            Changelog for the Intellij-Move $codeVersion
+//            </a></p>
+//    </body>
+//            """
+//            )
         }
 
         instrumentCode.set(false)
