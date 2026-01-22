@@ -1137,4 +1137,80 @@ class ResolveTypesTest : ResolveTestCase() {
                            //^
         }        
     """)
+
+    fun `test resolve public constructor`() = checkByCode("""
+        module 0x1::s {
+            public struct S { val: u8 }
+                        //X
+        }
+        module 0x1::main {
+            use 0x1::s::S;
+            fun main() {
+                S { val: 1 };
+              //^
+            }
+        }      
+    """)
+
+    fun `test resolve public constructor field`() = checkByCode("""
+        module 0x1::s {
+            public struct S { val: u8 }
+                             //X
+        }
+        module 0x1::main {
+            use 0x1::s::S;
+            fun main() {
+                S { val: 1 };
+                  //^
+            }
+        }   
+    """)
+
+    fun `test resolve public struct dot field`() = checkByCode("""
+        module 0x1::s {
+            public struct S { val: u8 }
+                             //X
+        }
+        module 0x1::main {
+            use 0x1::s::S;
+            fun main(s: S) {
+                s.val;
+                //^
+            }
+        }   
+    """)
+
+    fun `test public enum match`() = checkByCode("""
+        module 0x1::s {
+            public enum S { One, Two }
+                          //X
+        }
+        module 0x1::main {
+            use 0x1::s::S;
+            fun main(s: S) {
+                match (s) {
+                    S::One => 1,
+                     //^
+                    S::Two => 2,
+                };
+            }
+        }  
+    """)
+
+    fun `test public enum match field`() = checkByCode("""
+        module 0x1::s {
+            public enum S { One { val: u8 }, Two { val: u8 } }
+                                 //X
+        }
+        module 0x1::main {
+            use 0x1::s::S;
+            fun main(s: S) {
+                match (s) {
+                    S::One { val } => val,
+                            //^
+                    S::Two { val } => val,
+                };
+            }
+        }
+    """)
 }

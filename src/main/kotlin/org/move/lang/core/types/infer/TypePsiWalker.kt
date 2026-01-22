@@ -14,10 +14,12 @@ import org.move.lang.core.psi.ext.namedFields
 import org.move.lang.core.resolve.getEntriesFromWalkingScopes
 import org.move.lang.core.resolve.getFieldLookupResolveVariants
 import org.move.lang.core.resolve.getMethodResolveVariants
+import org.move.lang.core.resolve.isVisibleInContext
 import org.move.lang.core.resolve.ref.NAMES
 import org.move.lang.core.resolve.ref.resolveAliases
 import org.move.lang.core.resolve.ref.resolvePath
 import org.move.lang.core.resolve.scopeEntry.asEntries
+import org.move.lang.core.resolve.scopeEntry.asEntry
 import org.move.lang.core.resolve.scopeEntry.filterByName
 import org.move.lang.core.resolve.scopeEntry.namedElements
 import org.move.lang.core.resolve.scopeEntry.singleItemOrNull
@@ -541,11 +543,18 @@ class TypePsiWalker(
         val tyAdt =
             receiverTy.unwrapTyRefs() as? TyAdt ?: return TyUnknown
 
-        if (!msl && fieldLookup.containingModule != tyAdt.adtItem.module) {
-//        if (!msl && !fieldLookup.isDeclaredInModule(tyAdt.adtItem.module)) {
-            // fields invisible outside module they're declared in
-            return TyUnknown
+        if (!msl) {
+            val contextElement = fieldLookup.receiverExpr
+            val adtEntry = tyAdt.adtItem.asEntry() ?: return TyUnknown
+            if (!isVisibleInContext(adtEntry, contextElement)) {
+                return TyUnknown
+            }
         }
+
+//        if (!msl && fieldLookup.containingModule != tyAdt.adtItem.module) {
+//            // fields invisible outside module they're declared in
+//            return TyUnknown
+//        }
 
         val fieldEntry = getFieldLookupResolveVariants(tyAdt.adtItem)
             .filterByName(fieldLookup.referenceName)
