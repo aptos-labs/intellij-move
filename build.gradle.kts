@@ -32,15 +32,17 @@ plugins {
     id("java")
     kotlin("jvm") version "2.3.20"
     id("org.jetbrains.intellij.platform") version "2.13.1"
-    id("org.jetbrains.grammarkit") version "2023.3.0.3"
+    id("org.jetbrains.intellij.platform.grammarkit") version "2.13.1"
+//    id("org.jetbrains.grammarkit") version "2023.3.0.3"
     id("net.saliman.properties") version "1.6.0"
 }
 
 allprojects {
     apply {
         plugin("kotlin")
-        plugin("org.jetbrains.grammarkit")
+//        plugin("org.jetbrains.grammarkit")
         plugin("org.jetbrains.intellij.platform")
+        plugin("org.jetbrains.intellij.platform.grammarkit")
     }
 
     repositories {
@@ -88,10 +90,6 @@ allprojects {
         }
     }
 
-    grammarKit {
-        grammarKitRelease.set("2023.3")
-    }
-
     kotlin {
         jvmToolchain(21)
         if (file("src/$shortPlatformVersion/main/kotlin").exists()) {
@@ -110,17 +108,6 @@ allprojects {
                 sinceBuild.set(shortPlatformVersion)
                 untilBuild.set("$shortPlatformVersion.*")
             }
-
-//            val codeVersionForUrl = codeVersion.replace('.', '-')
-//            changeNotes.set(
-//                """
-//    <body>
-//        <p><a href="https://github.com/pontem-network/intellij-move/releases/tag/v$codeVersion">
-//            Changelog for the Intellij-Move $codeVersion
-//            </a></p>
-//    </body>
-//            """
-//            )
         }
 
         instrumentCode.set(false)
