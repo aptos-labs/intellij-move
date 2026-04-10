@@ -19,6 +19,7 @@ enum class Ns {
     NAME,
     FUNCTION,
     TYPE,
+    TUPLE_STRUCT,
     ENUM,
     ENUM_VARIANT,
     SCHEMA,
@@ -64,23 +65,22 @@ val ENUMS_N_MODULES = nsset(Ns.ENUM, Ns.MODULE)
 
 // variables | enum variants
 val VALUE_NS = nsset(Ns.NAME, Ns.FUNCTION, Ns.ENUM_VARIANT)
-val CONTAINER_TYPE_NS = nsset(Ns.TYPE, Ns.ENUM, Ns.ENUM_VARIANT)
-val CALLABLE_NS = nsset(Ns.NAME, Ns.FUNCTION, Ns.ENUM_VARIANT)
-
+val CONTAINER_TYPE_NS = nsset(Ns.TYPE, Ns.TUPLE_STRUCT, Ns.ENUM, Ns.ENUM_VARIANT)
+val CALLABLE_NS = nsset(Ns.NAME, Ns.FUNCTION, Ns.TUPLE_STRUCT, Ns.ENUM_VARIANT)
 // vector | resource types
-val INDEXABLE_NS = nsset(Ns.TYPE, Ns.ENUM, Ns.NAME)
+val INDEXABLE_NS = nsset(Ns.TYPE, Ns.ENUM, Ns.TUPLE_STRUCT, Ns.NAME)
 
-val ITEM_TYPE_NS = nsset(Ns.TYPE, Ns.ENUM)
+val ITEM_TYPE_NS = nsset(Ns.TYPE, Ns.TUPLE_STRUCT, Ns.ENUM)
 
 val ALL_NS = Ns.all()
-val IMPORTABLE_NS: NsSet = EnumSet.of(Ns.NAME, Ns.FUNCTION, Ns.TYPE, Ns.SCHEMA, Ns.ENUM)
+val IMPORTABLE_NS: NsSet = EnumSet.of(Ns.NAME, Ns.FUNCTION, Ns.TYPE, Ns.TUPLE_STRUCT, Ns.SCHEMA, Ns.ENUM)
 
 val MvNamedElement.itemNs: Ns
     get() = when (this) {
         is MvModule -> Ns.MODULE
         is MvFunctionLike -> Ns.FUNCTION
         is MvTypeParameter -> Ns.TYPE
-        is MvStruct -> Ns.TYPE
+        is MvStruct -> if (this.tupleFields != null) Ns.TUPLE_STRUCT else Ns.TYPE
         is MvEnum -> Ns.ENUM
         is MvEnumVariant -> Ns.ENUM_VARIANT
         is MvSchema -> Ns.SCHEMA

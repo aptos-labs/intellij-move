@@ -105,6 +105,8 @@ fun MvPath.allowedNamespaces(isCompletion: Boolean = false): NsSet {
         // all ns allowed in attributes
         parent is MvPathExpr
                 && this.hasAncestor<MvAttrItemInitializer>() -> ALL_NS
+        parent is MvPathExpr
+                && parent.parent is MvCallExpr -> CALLABLE_NS
         // TYPES for resource indexing, NAMES for vector indexing
         parent is MvPathExpr
                 && parent.parent is MvIndexExpr -> INDEXABLE_NS
