@@ -24,6 +24,7 @@ jobs:
         env:
             ORG_GRADLE_PROJECT_shortPlatformVersion: ${{ matrix.platform-version }}
             ORG_GRADLE_PROJECT_platformType: ${{ matrix.platform-type }}
+            CI: 1
 
         steps:
             -   name: Free disk space in the runner before build
