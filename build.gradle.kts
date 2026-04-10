@@ -23,24 +23,26 @@ val pluginVersion = "$codeVersion.$shortPlatformVersion"
 val pluginGroup = "org.move"
 val pluginName = "intellij-move"
 
-val kotlinReflectVersion = "2.2.0"
+val kotlinReflectVersion = "2.2.20"
 
 group = pluginGroup
 version = pluginVersion
 
 plugins {
     id("java")
-    kotlin("jvm") version "2.3.0"
-    id("org.jetbrains.intellij.platform") version "2.10.5"
-    id("org.jetbrains.grammarkit") version "2023.3.0.1"
-    id("net.saliman.properties") version "1.5.2"
+    kotlin("jvm") version "2.3.20"
+    id("org.jetbrains.intellij.platform") version "2.13.1"
+    id("org.jetbrains.intellij.platform.grammarkit") version "2.13.1"
+//    id("org.jetbrains.grammarkit") version "2023.3.0.3"
+    id("net.saliman.properties") version "1.6.0"
 }
 
 allprojects {
     apply {
         plugin("kotlin")
-        plugin("org.jetbrains.grammarkit")
+//        plugin("org.jetbrains.grammarkit")
         plugin("org.jetbrains.intellij.platform")
+        plugin("org.jetbrains.intellij.platform.grammarkit")
     }
 
     repositories {
@@ -88,10 +90,6 @@ allprojects {
         }
     }
 
-    grammarKit {
-        grammarKitRelease.set("2023.3")
-    }
-
     kotlin {
         jvmToolchain(21)
         if (file("src/$shortPlatformVersion/main/kotlin").exists()) {
@@ -110,17 +108,6 @@ allprojects {
                 sinceBuild.set(shortPlatformVersion)
                 untilBuild.set("$shortPlatformVersion.*")
             }
-
-//            val codeVersionForUrl = codeVersion.replace('.', '-')
-//            changeNotes.set(
-//                """
-//    <body>
-//        <p><a href="https://github.com/pontem-network/intellij-move/releases/tag/v$codeVersion">
-//            Changelog for the Intellij-Move $codeVersion
-//            </a></p>
-//    </body>
-//            """
-//            )
         }
 
         instrumentCode.set(false)
@@ -131,9 +118,7 @@ allprojects {
 
         pluginVerification {
             ides {
-                if (isCI) {
-                    recommended()
-                }
+                recommended()
             }
             failureLevel.set(
                 EnumSet.complementOf(
@@ -155,9 +140,11 @@ allprojects {
         }
         compileKotlin {
             compilerOptions {
-                languageVersion.set(KotlinVersion.KOTLIN_2_2)
-                apiVersion.set(KotlinVersion.KOTLIN_2_2)
                 freeCompilerArgs.add("-Xjvm-default=all")
+                val kotlinVersion =
+                    if (shortPlatformVersion == "253") KotlinVersion.KOTLIN_2_2 else KotlinVersion.KOTLIN_2_3
+                languageVersion.set(kotlinVersion)
+                apiVersion.set(kotlinVersion)
             }
         }
 

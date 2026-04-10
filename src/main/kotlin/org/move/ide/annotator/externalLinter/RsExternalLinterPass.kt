@@ -17,6 +17,7 @@ import com.intellij.codeInsight.highlighting.BackgroundHighlightingUtil
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.invokeLater
+import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
@@ -130,8 +131,8 @@ class RsExternalLinterPass(
     }
 
     private fun doFinish(highlights: List<HighlightInfo>) {
-        invokeLater(ModalityState.stateForComponent(editor.component)) {
-            if (disposable.isDisposed) return@invokeLater
+        runInEdt(ModalityState.stateForComponent(editor.component)) {
+            if (disposable.isDisposed) return@runInEdt
             UpdateHighlightersUtil.setHighlightersToEditor(
                 myProject,
                 document,
