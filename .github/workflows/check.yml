@@ -38,6 +38,9 @@ jobs:
             -   name: Setup Gradle
                 uses: gradle/actions/setup-gradle@v6
 
+            -   name: Generate lexer / parser
+                run: ./gradlew generateLexer generateParser --stacktrace -Pkotlin.incremental=false
+
             -   name: Build
                 run: ./gradlew assemble --stacktrace -Pkotlin.incremental=false
 
