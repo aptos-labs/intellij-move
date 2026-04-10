@@ -23,7 +23,7 @@ val pluginVersion = "$codeVersion.$shortPlatformVersion"
 val pluginGroup = "org.move"
 val pluginName = "intellij-move"
 
-val kotlinReflectVersion = "2.2.0"
+val kotlinReflectVersion = "2.2.20"
 
 group = pluginGroup
 version = pluginVersion
@@ -140,9 +140,11 @@ allprojects {
         }
         compileKotlin {
             compilerOptions {
-                languageVersion.set(KotlinVersion.KOTLIN_2_2)
-                apiVersion.set(KotlinVersion.KOTLIN_2_2)
                 freeCompilerArgs.add("-Xjvm-default=all")
+                val kotlinVersion =
+                    if (shortPlatformVersion == "253") KotlinVersion.KOTLIN_2_2 else KotlinVersion.KOTLIN_2_3
+                languageVersion.set(kotlinVersion)
+                apiVersion.set(kotlinVersion)
             }
         }
 
