@@ -115,7 +115,7 @@ FILE
     PsiWhiteSpace('\n    ')
     PsiElement(public)('public')
     PsiWhiteSpace(' ')
-    PsiErrorElement:'(', fun or struct_kw expected, got 'fu'
+    PsiErrorElement:'(', const_kw, fun or struct_kw expected, got 'fu'
       PsiElement(IDENTIFIER)('fu')
     PsiWhiteSpace('\n    ')
     PsiElement(entry_kw)('entry')
