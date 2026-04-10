@@ -40,6 +40,7 @@ fun NsSet.intersects(other: NsSet): Boolean = other.any { this.contains(it) }
 fun NsSet.add(other: NsSet): NsSet {
     return EnumSet.copyOf(this.plus(other))
 }
+
 fun NsSet.sub(other: NsSet): NsSet {
     val res = this.minus(other)
     return if (res.isEmpty()) {
@@ -60,14 +61,16 @@ val ENUMS = nsset(Ns.ENUM)
 val FUNCTIONS = nsset(Ns.FUNCTION)
 
 val ENUMS_N_MODULES = nsset(Ns.ENUM, Ns.MODULE)
-val TYPES_N_ENUMS_N_MODULES = nsset(Ns.TYPE, Ns.ENUM, Ns.MODULE)
 
-val TYPES_N_ENUMS = nsset(Ns.TYPE, Ns.ENUM)
-val TYPES_N_ENUMS_N_ENUM_VARIANTS = nsset(Ns.TYPE, Ns.ENUM, Ns.ENUM_VARIANT)
-val TYPES_N_ENUMS_N_ENUM_VARIANTS_N_MODULES = nsset(Ns.TYPE, Ns.ENUM, Ns.ENUM_VARIANT, Ns.MODULE)
-val NAMES_N_ENUM_VARIANTS = nsset(Ns.NAME, Ns.ENUM_VARIANT)
-val NAMES_N_FUNCTIONS_N_ENUM_VARIANTS = nsset(Ns.NAME, Ns.FUNCTION, Ns.ENUM_VARIANT)
-val TYPES_N_ENUMS_N_NAMES = nsset(Ns.TYPE, Ns.ENUM, Ns.NAME)
+// variables | enum variants
+val VALUE_NS = nsset(Ns.NAME, Ns.FUNCTION, Ns.ENUM_VARIANT)
+val CONTAINER_TYPE_NS = nsset(Ns.TYPE, Ns.ENUM, Ns.ENUM_VARIANT)
+val CALLABLE_NS = nsset(Ns.NAME, Ns.FUNCTION, Ns.ENUM_VARIANT)
+
+// vector | resource types
+val INDEXABLE_NS = nsset(Ns.TYPE, Ns.ENUM, Ns.NAME)
+
+val ITEM_TYPE_NS = nsset(Ns.TYPE, Ns.ENUM)
 
 val ALL_NS = Ns.all()
 val IMPORTABLE_NS: NsSet = EnumSet.of(Ns.NAME, Ns.FUNCTION, Ns.TYPE, Ns.SCHEMA, Ns.ENUM)
