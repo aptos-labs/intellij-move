@@ -31,7 +31,7 @@ version = pluginVersion
 plugins {
     id("java")
     kotlin("jvm") version "2.3.20"
-    id("org.jetbrains.intellij.platform") version "2.10.5"
+    id("org.jetbrains.intellij.platform") version "2.13.1"
     id("org.jetbrains.grammarkit") version "2023.3.0.3"
     id("net.saliman.properties") version "1.6.0"
 }
@@ -131,9 +131,7 @@ allprojects {
 
         pluginVerification {
             ides {
-                if (isCI) {
-                    recommended()
-                }
+                recommended()
             }
             failureLevel.set(
                 EnumSet.complementOf(
