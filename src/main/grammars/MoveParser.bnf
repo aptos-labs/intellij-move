@@ -277,7 +277,7 @@ private ModuleItem ::= UseStmt
                         | ModuleItemSpec
                         | ItemSpec
 
-Const ::= Attr* CONST_KW IDENTIFIER TypeAscription Initializer ';'
+Const ::= Attr* VisibilityModifier? CONST_KW IDENTIFIER TypeAscription Initializer ';'
 {
     pin = "CONST_KW"
     implements = [
