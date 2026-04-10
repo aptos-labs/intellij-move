@@ -843,4 +843,51 @@ module 0x1::spec_block_with_lambdas {
 }
 """
     )
+
+    fun `test cannot resolve private const across modules`() = checkByCode(
+        """
+        module 0x1::s {
+            const MY_CONST: u8 = 1;
+        }
+        module 0x1::main {
+            use 0x1::s;
+            fun main() {
+                let a = s::MY_CONST;
+                            //^ unresolved
+            }
+        }
+"""
+    )
+
+    fun `test resolve public const`() = checkByCode(
+        """
+        module 0x1::s {
+            public const MY_CONST: u8 = 1;
+                        //X
+        }
+        module 0x1::main {
+            use 0x1::s;
+            fun main() {
+                let a = s::MY_CONST;
+                            //^
+            }
+        }
+"""
+    )
+
+    fun `test resolve package const`() = checkByCode(
+        """
+        module 0x1::s {
+            package const MY_CONST: u8 = 1;
+                        //X
+        }
+        module 0x1::main {
+            use 0x1::s;
+            fun main() {
+                let a = s::MY_CONST;
+                            //^
+            }
+        }
+"""
+    )
 }
