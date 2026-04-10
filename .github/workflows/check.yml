@@ -39,7 +39,7 @@ jobs:
                 uses: gradle/actions/setup-gradle@v6
 
             -   name: Setup dependencies
-                run: ./gradlew dependencies --stacktrace --info
+                run: ./gradlew dependencies --stacktrace
 
             -   name: Build
                 run: ./gradlew assemble --stacktrace -Pkotlin.incremental=false
