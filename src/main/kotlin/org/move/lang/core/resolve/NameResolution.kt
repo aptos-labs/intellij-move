@@ -79,7 +79,7 @@ fun getPatBindingsResolveVariants(
             }
         }
 
-        val ns = if (isCompletion) TYPES_N_ENUMS_N_ENUM_VARIANTS_N_MODULES else ENUM_VARIANTS
+        val ns = if (isCompletion) CONTAINER_TYPE_NS.add(MODULES) else ENUM_VARIANTS
 
         val bindingEntries = getEntriesFromWalkingScopes(binding, ns)
 

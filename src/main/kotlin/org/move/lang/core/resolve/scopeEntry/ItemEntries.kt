@@ -3,8 +3,6 @@ package org.move.lang.core.resolve.scopeEntry
 import org.move.lang.core.psi.MvModule
 import org.move.lang.core.psi.ext.allNonTestFunctions
 import org.move.lang.core.psi.ext.specInlineFunctions
-import org.move.lang.core.psi.ext.tupleStructs
-import org.move.lang.core.resolve.ref.Ns
 
 val MvModule.itemEntries: List<ScopeEntry>
     get() {
@@ -24,7 +22,6 @@ fun getItemEntriesInner(owner: MvModule): List<ScopeEntry> {
 
             // callables
             addAll(owner.allNonTestFunctions().asEntries())
-            addAll(owner.tupleStructs().mapNotNull { it.asEntry()?.copyWithNs(Ns.NAME) })
 
             // spec callables
             addAll(owner.specFunctionList.asEntries())

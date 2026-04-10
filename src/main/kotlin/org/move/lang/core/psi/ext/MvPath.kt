@@ -92,32 +92,34 @@ fun MvPath.allowedNamespaces(isCompletion: Boolean = false): NsSet {
         parent is MvUseSpeck -> IMPORTABLE_NS
 
         parent is MvPathType
-                && parent.parent is MvIsExpr -> TYPES_N_ENUMS_N_ENUM_VARIANTS
+                && parent.parent is MvIsExpr -> CONTAINER_TYPE_NS
 
         // a: bar
         //     ^
-        parent is MvPathType && qualifier == null -> if (isCompletion) TYPES_N_ENUMS_N_MODULES else TYPES_N_ENUMS
+        parent is MvPathType && qualifier == null -> if (isCompletion) ITEM_TYPE_NS.add(MODULES) else ITEM_TYPE_NS
         // a: foo::bar
         //         ^
-        parent is MvPathType && qualifier != null -> TYPES_N_ENUMS
+        parent is MvPathType && qualifier != null -> ITEM_TYPE_NS
 //        parent is MvCallExpr -> NAMES_N_ENUM_VARIANTS
-        parent is MvCallExpr -> NAMES_N_FUNCTIONS_N_ENUM_VARIANTS
+        parent is MvCallExpr -> CALLABLE_NS
         // all ns allowed in attributes
         parent is MvPathExpr
                 && this.hasAncestor<MvAttrItemInitializer>() -> ALL_NS
+        parent is MvPathExpr
+                && parent.parent is MvCallExpr -> CALLABLE_NS
         // TYPES for resource indexing, NAMES for vector indexing
         parent is MvPathExpr
-                && parent.parent is MvIndexExpr -> TYPES_N_ENUMS_N_NAMES
+                && parent.parent is MvIndexExpr -> INDEXABLE_NS
 
         // can be anything in completion
-        parent is MvPathExpr -> if (isCompletion) ALL_NS else NAMES_N_FUNCTIONS_N_ENUM_VARIANTS
+        parent is MvPathExpr -> if (isCompletion) ALL_NS else VALUE_NS
 
         parent is MvSchemaLit
                 || parent is MvSchemaRef -> SCHEMAS
         parent is MvStructLitExpr
                 || parent is MvPatStruct
                 || parent is MvPatConst
-                || parent is MvPatTupleStruct -> TYPES_N_ENUMS_N_ENUM_VARIANTS
+                || parent is MvPatTupleStruct -> CONTAINER_TYPE_NS
 
         parent is MvFriendDecl -> MODULES
         parent is MvModuleSpec -> MODULES

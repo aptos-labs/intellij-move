@@ -7,7 +7,7 @@ import org.move.lang.core.psi.*
 import org.move.lang.core.psi.NamedItemScope.MAIN
 import org.move.lang.core.psi.ext.*
 import org.move.lang.core.resolve.ref.Ns.NAME
-import org.move.lang.core.resolve.ref.TYPES_N_ENUMS
+import org.move.lang.core.resolve.ref.ITEM_TYPE_NS
 import org.move.lang.core.resolve.ref.Visibility.*
 import org.move.lang.core.resolve.scopeEntry.ScopeEntry
 
@@ -68,7 +68,7 @@ fun isVisibleInContext(scopeEntry: ScopeEntry, contextElement: MvElement): Boole
     if (itemModule == pathModule) return true
 
     // item is type, check whether it's allowed in the context
-    if (TYPES_N_ENUMS.contains(itemNs)) {
+    if (ITEM_TYPE_NS.contains(itemNs)) {
         val pathParent = path?.rootPath()?.parent
         when (pathParent) {
             // todo: when structs and enums can be public, conditions for struct lit/pat should be added here

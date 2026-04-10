@@ -1213,4 +1213,51 @@ class ResolveTypesTest : ResolveTestCase() {
             }
         }
     """)
+
+    fun `test resolve tuple struct as a type`() = checkByCode("""
+        module 0x1::m {
+            struct S(u8);
+                 //X
+            fun main(s: S) {
+                      //^
+            }
+        }
+    """)
+
+    fun `test resolve tuple struct from import`() = checkByCode("""
+        module 0x1::s {
+            struct TransformationFunction(u8);
+                     //X
+        }
+        module 0x1::main {
+            use 0x1::s::TransformationFunction;
+            fun main(f: TransformationFunction) {
+                          //^
+            }
+        }
+    """)
+
+    fun `test resolve tuple struct from use item`() = checkByCode("""
+        module 0x1::s {
+            struct TransformationFunction(u8);
+                     //X
+        }
+        module 0x1::main {
+            use 0x1::s::TransformationFunction;
+                        //^
+        }
+    """)
+
+    fun `test resolve tuple struct with generics from import`() = checkByCode("""
+        module 0x1::s {
+            struct TransformationFunction<phantom P>(u8);
+                     //X
+        }
+        module 0x1::main {
+            use 0x1::s::TransformationFunction;
+            fun main(f: TransformationFunction<u8>) {
+                          //^
+            }
+        }
+    """)
 }
