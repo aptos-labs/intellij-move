@@ -30,10 +30,10 @@ version = pluginVersion
 
 plugins {
     id("java")
-    kotlin("jvm") version "2.3.0"
+    kotlin("jvm") version "2.3.20"
     id("org.jetbrains.intellij.platform") version "2.10.5"
-    id("org.jetbrains.grammarkit") version "2023.3.0.1"
-    id("net.saliman.properties") version "1.5.2"
+    id("org.jetbrains.grammarkit") version "2023.3.0.3"
+    id("net.saliman.properties") version "1.6.0"
 }
 
 allprojects {
