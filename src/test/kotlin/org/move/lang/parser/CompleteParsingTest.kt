@@ -71,6 +71,8 @@ class CompleteParsingTest: MvParsingTestCase("complete") {
     fun `test public struct`() = doTest()
     fun `test public enum`() = doTest()
 
+    fun `test assert macro`() = doTest()
+
     fun doTest() {
         super.doTest(true, true)
     }
