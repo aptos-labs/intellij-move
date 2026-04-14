@@ -3,6 +3,7 @@ package org.move.lang.core.types.infer
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
+import fleet.fastutil.skip
 import org.move.cli.settings.debugErrorOrFallback
 import org.move.cli.settings.isDebugModeEnabled
 import org.move.cli.settings.moveSettings
@@ -10,7 +11,6 @@ import org.move.ide.formatter.impl.location
 import org.move.lang.core.completion.providers.dropInvisibleEntries
 import org.move.lang.core.psi.*
 import org.move.lang.core.psi.ext.*
-import org.move.lang.core.psi.ext.namedFields
 import org.move.lang.core.resolve.getEntriesFromWalkingScopes
 import org.move.lang.core.resolve.getFieldLookupResolveVariants
 import org.move.lang.core.resolve.getMethodResolveVariants
@@ -18,12 +18,7 @@ import org.move.lang.core.resolve.isVisibleInContext
 import org.move.lang.core.resolve.ref.NAMES
 import org.move.lang.core.resolve.ref.resolveAliases
 import org.move.lang.core.resolve.ref.resolvePath
-import org.move.lang.core.resolve.scopeEntry.asEntries
-import org.move.lang.core.resolve.scopeEntry.asEntry
-import org.move.lang.core.resolve.scopeEntry.filterByName
-import org.move.lang.core.resolve.scopeEntry.namedElements
-import org.move.lang.core.resolve.scopeEntry.singleItemOrNull
-import org.move.lang.core.resolve.scopeEntry.toPathResolveResults
+import org.move.lang.core.resolve.scopeEntry.*
 import org.move.lang.core.types.infer.Expected.NoValue
 import org.move.lang.core.types.ty.*
 import org.move.lang.core.types.ty.TyReference.Companion.autoborrow
@@ -228,7 +223,7 @@ class TypePsiWalker(
             is MvPathExpr -> inferPathExprTy(expr, expected)
             is MvBorrowExpr -> inferBorrowExprTy(expr, expected)
             is MvCallExpr -> inferCallExprTy(expr, expected)
-            is MvAssertMacroExpr -> inferMacroCallExprTy(expr)
+            is MvAssertMacroExpr -> inferAssertMacroExprTy(expr)
             is MvStructLitExpr -> inferStructLitExprTy(expr, expected)
             is MvVectorLitExpr -> inferVectorLitExpr(expr, expected)
             is MvIndexExpr -> inferIndexExprTy(expr)
@@ -694,15 +689,41 @@ class TypePsiWalker(
         return tupleTy.substitute(tyVarsSubst) as TyCallable
     }
 
-    fun inferMacroCallExprTy(macroExpr: MvAssertMacroExpr): Ty {
-        val ident = macroExpr.identifier
-        if (ident.text == "assert") {
-            val formalInputTys = listOf(TyBool, TyInteger.default())
-            coerceArgumentTypes(
-                macroExpr.valueArguments.map { it.expr }.map { CallArg.Arg(it) },
-                formalInputTys,
-                emptyList(),
-            )
+    fun inferAssertMacroExprTy(macroExpr: MvAssertMacroExpr): Ty {
+        val argExprs = macroExpr.argumentExprs
+        when (macroExpr.assertKind) {
+            AssertKind.PLAIN -> {
+                // coerce first argument into bool
+                val firstArgExpr = argExprs.getOrNull(0)
+                if (firstArgExpr != null) {
+                    val argExprTy = this.inferExprTy(firstArgExpr, Expected.fromType(TyBool))
+                    coerceTypes(firstArgExpr, argExprTy, TyBool)
+                }
+                // coerce second arg into [u64 | vector<u8>]
+                val secondArgExpr = argExprs.getOrNull(1)
+                if (secondArgExpr != null) {
+                    val argExprTy = this.inferExprTy(secondArgExpr)
+                    coerceToAnyType(
+                        secondArgExpr,
+                        argExprTy,
+                        listOf(TyInteger(TyInteger.Kind.u64), TyByteString(this.msl))
+                    )
+                }
+                // third argument etc.
+                for (argExpr in argExprs.drop(2)) {
+                    if (argExpr != null) {
+                        inferExprTy(argExpr)
+                    }
+                }
+            }
+            AssertKind.EQ, AssertKind.NOT_EQ -> {
+                val argTyVar = TyInfer.TyVar()
+                coerceArgumentTypes(
+                    argExprs.map { CallArg.Arg(it) },
+                    listOf(argTyVar, argTyVar, TyByteString(this.msl)),
+                    emptyList(),
+                )
+            }
         }
         return TyUnit
     }

@@ -1782,6 +1782,29 @@ module 0x1::pool {
                 -<error descr="Incompatible type 'bool', expected 'integer'">true</error>;
                 --1;
             }
-        }       
+        }
         """)
+
+    fun `test assert with invalid error code param`() = checkByText("""
+        module 0x1::main {
+            public fun main() {
+                assert!(<error descr="Incompatible type 'u8', expected 'bool'">1u8</error>, b"1234 {}");
+                assert!(true, 11);
+                assert!(true, 11u64);
+                assert!(true, <error descr="Incompatible type 'u8', expected any of ['u64', 'vector<u8>']">11u8</error>);
+                assert!(true, <error descr="Incompatible type 'bool', expected any of ['u64', 'vector<u8>']">true</error>);
+                assert!(true, <error descr="Incompatible type 'vector<bool>', expected any of ['u64', 'vector<u8>']">vector[true]</error>);
+            }
+        }
+    """)
+
+    fun `test assert_eq_ne with different parameter types`() = checkByText("""
+        module 0x1::main {
+            public fun main() {
+                assert_eq!(1, <error descr="Incompatible type 'bool', expected 'integer'">true</error>);
+                assert_eq!(1u8, <error descr="Incompatible type 'u64', expected 'u8'">1u64</error>);
+                assert_eq!(1, 1, <error descr="Incompatible type 'bool', expected 'vector<u8>'">true</error>);
+            }
+        }
+    """)
 }

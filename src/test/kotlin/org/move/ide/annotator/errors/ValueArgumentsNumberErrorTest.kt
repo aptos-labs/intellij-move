@@ -86,10 +86,36 @@ class ValueArgumentsNumberErrorTest: AnnotatorTestCase(MvErrorAnnotator::class) 
     fun `test assert macro expects one or two parameters`() = checkErrors("""
         module 0x1::m {
             fun call() {
-                assert!(<error descr="This function takes 1 to 2 parameters but 0 parameters were supplied">)</error>;
+                assert!(<error descr="This function takes 1 to 6 parameters but 0 parameters were supplied">)</error>;
                 assert!(true);
                 assert!(true, 1);
-                assert!(true, 1, <error descr="This function takes 1 to 2 parameters but 3 parameters were supplied">1</error>);            }
-        }        
+                assert!(true, 1, 1);            }
+        }
+    """)
+
+    fun `test assert with message and format arguments`() = checkErrors("""
+        module 0x1::main {
+            public fun main() {
+                assert!(true, b"1234 {}");
+                assert!(true, b"1234 {}", 1);
+                assert!(true, b"1234 {}", 1, 2);
+                assert!(true, b"1234 {}", 1, 2, 3);
+                assert!(true, b"1234 {}", 1, 2, 3, 4);
+                assert!(true, b"1234 {}", 1, 2, 3, 4, <error descr="This function takes 1 to 6 parameters but 7 parameters were supplied">5</error>);
+            }
+        }
+    """)
+
+    fun `test assert_eq_ne with message`() = checkErrors("""
+        module 0x1::main {
+            public fun main() {
+                assert_eq!(1, 1);
+                assert_ne!(1, 1);
+
+                assert_eq!(1, 1, b"1234");
+                assert_eq!(1, 1, b"1234", 1, 2, 3, 4);
+                assert_eq!(1, 1, b"1234", 1, 2, 3, 4, <error descr="This function takes 2 to 7 parameters but 8 parameters were supplied">5</error>);
+            }
+        }
     """)
 }

@@ -77,32 +77,60 @@ class BuiltInsCompletionTest : CompletionTestCase() {
     }    
     """)
 
-    fun `test autocomplete assert! in module`() = doSingleCompletion("""
+    fun `test autocomplete assert! in module`() = doFirstCompletion("""
     module 0x1::M {
         fun m() {
             ass/*caret*/
         }
-    }    
+    }
     """, """
     module 0x1::M {
         fun m() {
             assert!(/*caret*/)
         }
-    }    
+    }
     """)
 
-    fun `test autocomplete assert! in script`() = doSingleCompletion("""
+    fun `test autocomplete assert! in script`() = doFirstCompletion("""
     script {
         fun m() {
             ass/*caret*/
         }
-    }    
+    }
     """, """
     script {
         fun m() {
             assert!(/*caret*/)
         }
-    }    
+    }
+    """)
+
+    fun `test autocomplete assert_eq!`() = doSingleCompletion("""
+    module 0x1::M {
+        fun m() {
+            assert_e/*caret*/
+        }
+    }
+    """, """
+    module 0x1::M {
+        fun m() {
+            assert_eq!(/*caret*/)
+        }
+    }
+    """)
+
+    fun `test autocomplete assert_ne!`() = doSingleCompletion("""
+    module 0x1::M {
+        fun m() {
+            assert_n/*caret*/
+        }
+    }
+    """, """
+    module 0x1::M {
+        fun m() {
+            assert_ne!(/*caret*/)
+        }
+    }
     """)
 
     fun `test 0 has no completions`() = checkNoCompletion("""
