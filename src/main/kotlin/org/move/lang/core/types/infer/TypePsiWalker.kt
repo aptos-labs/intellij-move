@@ -276,10 +276,7 @@ class TypePsiWalker(
             }
             is MvContinueExpr -> TyNever
             is MvBreakExpr -> TyNever
-            is MvAbortExpr -> {
-                expr.expr?.inferTypeCoercableTo(TyInteger.DEFAULT)
-                TyNever
-            }
+            is MvAbortExpr -> inferAbortExpr(expr)
             is MvCodeBlockExpr -> expr.codeBlock.inferBlockType(expected, coerce = true)
             is MvAssignmentExpr -> inferAssignmentExprTy(expr)
             is MvBoolSpecExpr -> inferBoolSpecExpr(expr)
@@ -304,6 +301,22 @@ class TypePsiWalker(
 
         return this.resolveTypeVarsIfPossible(refinedExprTy)
 //        return refinedExprTy
+    }
+
+    private fun inferAbortExpr(abortExpr: MvAbortExpr): Ty {
+        val innerExpr = abortExpr.expr
+        if (innerExpr != null) {
+            val actualTy = innerExpr.inferType()
+            coerceToAnyType(
+                innerExpr,
+                actualTy,
+                listOf(
+                    TyInteger(TyInteger.Kind.u64),
+                    TyByteString(this.msl),
+                ),
+            )
+        }
+        return TyNever
     }
 
     private fun inferBoolSpecExpr(expr: MvBoolSpecExpr): Ty {
@@ -752,6 +765,20 @@ class TypePsiWalker(
                 false
             }
         }
+    }
+
+    fun coerceToAnyType(element: PsiElement, actual: Ty, expectedTys: List<Ty>): Boolean {
+        val actual = resolveTypeVarsIfPossible(actual)
+        val resolvedExpectedTys = mutableListOf<Ty>()
+        for (expectedTy in expectedTys) {
+            val expected = resolveTypeVarsIfPossible(expectedTy)
+            if (actual == expected) return true
+            val combineResult = ctx.combineTypes(actual, expected)
+            if (combineResult is RsResult.Ok) return true
+            resolvedExpectedTys.add(expected)
+        }
+        reportTypeError(TypeError.TypeMismatchAny(element, resolvedExpectedTys, actual))
+        return false
     }
 
     private fun inferDotExprTy(dotExpr: MvDotExpr, expected: Expected): Ty {

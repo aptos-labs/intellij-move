@@ -1237,11 +1237,11 @@ module 0x1::pool {
         module 0x1::m {
             fun main() {
                 abort 1;
-                abort 1u8;
+                abort <error descr="Incompatible type 'u8', expected any of ['u64', 'vector<u8>']">1u8</error>;
                 abort 1u64;
-                abort <error descr="Incompatible type 'bool', expected 'integer'">false</error>;
+                abort <error descr="Incompatible type 'bool', expected any of ['u64', 'vector<u8>']">false</error>;
             }
-        }        
+        }
     """
     )
 
@@ -1266,7 +1266,47 @@ module 0x1::pool {
             spec call {
                 aborts_with <error descr="Incompatible type 'bool', expected 'integer'">false</error>;
             }
-        }        
+        }
+    """
+    )
+
+    fun `test abort with integer type`() = checkByText(
+        """
+        module 0x1::m {
+            fun main() {
+                abort 1u64;
+                abort <error descr="Incompatible type 'u8', expected any of ['u64', 'vector<u8>']">1u8</error>;
+                abort <error descr="Incompatible type 'u16', expected any of ['u64', 'vector<u8>']">1u16</error>;
+            }
+        }
+    """
+    )
+
+    fun `test abort with vector u8`() = checkByText(
+        """
+        module 0x1::m {
+            fun main() {
+                abort b"1234";
+                abort vector[1, 2, 3, 4];
+                abort vector[1u8, 2u8];
+                abort <error descr="Incompatible type 'vector<u128>', expected any of ['u64', 'vector<u8>']">vector[1u128, 2u128]</error>;
+            }
+        }
+    """
+    )
+
+    fun `test abort with block returning u64`() = checkByText(
+        """
+        module 0x1::m {
+            fun main() {
+                abort { 1u64 };
+                abort { b"1234" };
+                abort { vector[1u8] };
+                abort <error descr="Incompatible type 'vector<u64>', expected any of ['u64', 'vector<u8>']">{ vector[1u64] }</error>;
+                abort <error descr="Incompatible type 'u8', expected any of ['u64', 'vector<u8>']">{ 1u8 }</error>;
+                abort <error descr="Incompatible type 'vector<bool>', expected any of ['u64', 'vector<u8>']">{ vector[true, false] }</error>;
+            }
+        }
     """
     )
 
