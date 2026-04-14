@@ -363,10 +363,10 @@ module 0x1::m {
 }        
     """)
 
-    fun `test spec builtin const unresolved outside spec`() = checkByText("""
+    fun `test builtin const outside spec`() = checkByText("""
 module 0x1::m {
     fun main() {
-        <error descr="Unresolved reference: `MAX_U128`">MAX_U128</error>;
+        MAX_U128;
     }
 }
     """)
