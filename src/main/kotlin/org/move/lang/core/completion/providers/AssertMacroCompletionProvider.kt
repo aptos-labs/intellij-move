@@ -3,6 +3,7 @@ package org.move.lang.core.completion.providers
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
+import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.editor.EditorModificationUtil
 import com.intellij.patterns.ElementPattern
@@ -32,16 +33,21 @@ object AssertMacroCompletionProvider: MvCompletionProvider() {
 
         if (parameters.position !== path.referenceNameElement) return
 
+        result.addElement(assertElement("assert!", "(_: bool, err: u64)"))
+        result.addElement(assertElement("assert_eq!", "(_: T, _: T, err: vector<u8>)"))
+        result.addElement(assertElement("assert_ne!", "(_: T, _: T, err: vector<u8>)"))
+    }
+
+    fun assertElement(name: String, signature: String): LookupElement {
         val lookupElement = LookupElementBuilder
-            .create("assert!")
-            .withTailText("(_: bool, err: u64)")
+            .create(name)
+            .withTailText(signature)
             .withTypeText("()")
             .withInsertHandler { ctx, _ ->
                 val document = ctx.document
                 document.insertString(ctx.selectionEndOffset, "()")
                 EditorModificationUtil.moveCaretRelatively(ctx.editor, 1)
             }
-        result.addElement(PrioritizedLookupElement.withPriority(lookupElement, MACRO_PRIORITY))
+        return PrioritizedLookupElement.withPriority(lookupElement, MACRO_PRIORITY)
     }
-
 }

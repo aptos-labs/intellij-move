@@ -3,6 +3,7 @@ package org.move.lang.core.types.infer
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
+import fleet.fastutil.skip
 import org.move.cli.settings.debugErrorOrFallback
 import org.move.cli.settings.isDebugModeEnabled
 import org.move.cli.settings.moveSettings
@@ -693,13 +694,13 @@ class TypePsiWalker(
         when (macroExpr.assertKind) {
             AssertKind.PLAIN -> {
                 // coerce first argument into bool
-                val firstArgExpr = argExprs[0]
+                val firstArgExpr = argExprs.getOrNull(0)
                 if (firstArgExpr != null) {
                     val argExprTy = this.inferExprTy(firstArgExpr, Expected.fromType(TyBool))
                     coerceTypes(firstArgExpr, argExprTy, TyBool)
                 }
                 // coerce second arg into [u64 | vector<u8>]
-                val secondArgExpr = argExprs[1]
+                val secondArgExpr = argExprs.getOrNull(1)
                 if (secondArgExpr != null) {
                     val argExprTy = this.inferExprTy(secondArgExpr)
                     coerceToAnyType(
@@ -709,7 +710,7 @@ class TypePsiWalker(
                     )
                 }
                 // third argument etc.
-                for (argExpr in argExprs.subList(2, argExprs.size)) {
+                for (argExpr in argExprs.drop(2)) {
                     if (argExpr != null) {
                         inferExprTy(argExpr)
                     }
