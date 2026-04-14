@@ -65,6 +65,29 @@ sealed class TypeError(open val element: PsiElement) : TypeFoldable<TypeError> {
         }
     }
 
+    data class TypeMismatchAny(
+        override val element: PsiElement,
+        val expectedTys: List<Ty>,
+        val actualTy: Ty
+    ) : TypeError(element) {
+        override fun message(): String {
+            val expectedTysText = expectedTys.joinToString(", ") { "'${it.name()}'" }
+            return "Incompatible type '${actualTy.name()}', expected any of [$expectedTysText]"
+        }
+
+        override fun deepFoldWith(folder: TypeFolder): TypeError {
+            return TypeMismatchAny(
+                element,
+                expectedTys.map { folder.fold(it) },
+                folder.fold(actualTy)
+            )
+        }
+
+        override fun deepVisitWith(visitor: TypeVisitor): Boolean {
+            return visitor.visit(actualTy) || expectedTys.any { visitor.visit(it) }
+        }
+    }
+
     data class UnsupportedBinaryOp(
         override val element: PsiElement,
         val ty: Ty,
