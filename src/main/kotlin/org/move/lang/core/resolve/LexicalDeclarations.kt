@@ -57,7 +57,7 @@ private fun getEntriesInBlocks(scope: MvElement, cameFrom: MvElement, ns: NsSet)
 class SpecCodeBlockNonBindings(override val owner: MvSpecCodeBlock): PsiCachedValueProvider<List<ScopeEntry>> {
     override fun compute(): CachedValueProvider.Result<List<ScopeEntry>> {
         val entries = buildList {
-            addAll(owner.builtinSpecConsts().asEntries())
+//            addAll(owner.builtinSpecConsts().asEntries())
             addAll(owner.globalVariables().asEntries())
             addAll(owner.specInlineFunctions().asReversed().asEntries())
         }
@@ -76,6 +76,7 @@ class EntriesInResolveScopes(override val owner: MvElement): PsiCachedValueProvi
                     addAll(owner.itemEntries)
                     addAll(owner.enumVariants().asEntries())
                     addAll(owner.builtinFunctions().asEntries())
+                    addAll(owner.builtinConsts().asEntries())
                     addAll(owner.builtinSpecFunctions().asEntries())
                 }
                 is MvScript -> {
