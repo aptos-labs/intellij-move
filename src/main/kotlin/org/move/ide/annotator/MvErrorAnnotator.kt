@@ -330,7 +330,10 @@ class MvErrorAnnotator: MvAnnotatorBase() {
                     val count = callTy.paramTypes.size - 1
                     IntRange(count, count)
                 }
-                is MvAssertMacroExpr -> IntRange(1, 2)
+                is MvAssertMacroExpr -> when (callable.assertKind) {
+                    AssertKind.PLAIN -> IntRange(1, 6)
+                    AssertKind.EQ, AssertKind.NOT_EQ -> IntRange(2, 7)
+                }
                 else -> return
             }
 
