@@ -11,4 +11,7 @@ val MvVisibilityModifier.hasPackage get() = hasChild(PACKAGE)
 // friend fun | public(friend) fun
 val MvVisibilityModifier.hasFriend get() = hasChild(FRIEND)
 
+val MvVisibilityModifier.isPublicFriend get() = hasPublic && hasFriend
+val MvVisibilityModifier.isPublicPackage get() = hasPublic && hasPackage
+
 val MvVisibilityModifier.function: MvFunction? get() = parent as? MvFunction

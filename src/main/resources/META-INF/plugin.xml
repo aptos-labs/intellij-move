@@ -295,6 +295,14 @@
                      displayName="Needless pair of `*` and `&amp;` operators"
                      enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="org.move.ide.inspections.MvNeedlessDerefRefInspection" />
+    <localInspection language="Move" groupName="Move"
+                     displayName="Replace `public(friend)` with `friend`"
+                     enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="org.move.ide.inspections.compilerV2.MvReplaceWithFriendVisInspection" />
+    <localInspection language="Move" groupName="Move"
+                     displayName="Replace `public(package)` with `package`"
+                     enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="org.move.ide.inspections.compilerV2.MvReplaceWithPackageVisInspection" />
 
     <!--  cannot be run on-the-fly, therefore enabled  -->
     <globalInspection language="Move" groupName="Move"
