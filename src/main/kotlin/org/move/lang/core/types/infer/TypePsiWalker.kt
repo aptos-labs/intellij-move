@@ -1068,23 +1068,11 @@ class TypePsiWalker(
     private fun inferOrderingBinaryExprTy(binaryExpr: MvBinaryExpr): Ty {
         val leftExpr = binaryExpr.left
         val rightExpr = binaryExpr.right
-        val op = binaryExpr.binaryOp.op
 
-        var typeErrorEncountered = false
         val leftTy = leftExpr.inferType()
-        if (!leftTy.supportsOrdering()) {
-            ctx.reportTypeError(TypeError.UnsupportedBinaryOp(leftExpr, leftTy, op))
-            typeErrorEncountered = true
-        }
         if (rightExpr != null) {
             val rightTy = rightExpr.inferType()
-            if (!rightTy.supportsOrdering()) {
-                ctx.reportTypeError(TypeError.UnsupportedBinaryOp(rightExpr, rightTy, op))
-                typeErrorEncountered = true
-            }
-            if (!typeErrorEncountered) {
-                coerceTypes(rightExpr, rightTy, expected = leftTy)
-            }
+            coerceTypes(rightExpr, rightTy, expected = leftTy)
         }
         return TyBool
     }

@@ -922,34 +922,21 @@ module 0x1::main {
     """
     )
 
-    fun `test cannot order references`() = checkByText(
+    fun `test can order references`() = checkByText(
         """
 module 0x1::main {
     fun main(a: &u64, b: &u64) {
-        <error descr="Invalid argument to '<': expected integer type, but found '&u64'">a</error> 
-        < <error descr="Invalid argument to '<': expected integer type, but found '&u64'">b</error>;
+        a < b;
     }
 }        
     """
     )
 
-    fun `test cannot order bools`() = checkByText(
+    fun `test cann order bools`() = checkByText(
         """
 module 0x1::main {
     fun main(a: bool, b: bool) {
-        <error descr="Invalid argument to '<': expected integer type, but found 'bool'">a</error> 
-        < <error descr="Invalid argument to '<': expected integer type, but found 'bool'">b</error>;
-    }
-}        
-    """
-    )
-
-    fun `test cannot order type parameters`() = checkByText(
-        """
-module 0x1::main {
-    fun main<T>(a: T, b: T) {
-        <error descr="Invalid argument to '<': expected integer type, but found 'T'">a</error> 
-        < <error descr="Invalid argument to '<': expected integer type, but found 'T'">b</error>;
+        a < b;
     }
 }        
     """
