@@ -303,6 +303,10 @@
                      displayName="Replace `public(package)` with `package`"
                      enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="org.move.ide.inspections.compilerV2.MvReplaceWithPackageVisInspection" />
+    <localInspection language="Move" groupName="Move"
+                     displayName="Unused acquires declaration"
+                     enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="org.move.ide.inspections.compilerV2.MvUnusedAcquiresInspection" />
 
     <!--  cannot be run on-the-fly, therefore enabled  -->
     <globalInspection language="Move" groupName="Move"
