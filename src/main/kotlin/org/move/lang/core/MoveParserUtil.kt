@@ -539,6 +539,20 @@ object MoveParserUtil: GeneratedParserUtilBase() {
     @JvmStatic
     fun toKeyword(b: PsiBuilder, level: Int): Boolean = contextualKeyword(b, "to", TO)
 
+    @JvmStatic
+    fun proofKeyword(b: PsiBuilder, level: Int): Boolean = contextualKeyword(
+        b,
+        "proof",
+        PROOF_KW
+    )
+
+    @JvmStatic
+    fun lemmaKeyword(b: PsiBuilder, level: Int): Boolean = contextualKeyword(
+        b,
+        "lemma",
+        LEMMA_KW
+    )
+
     private val FLAGS: Key<Int> = Key("MoveParserUtil.FLAGS")
     private var PsiBuilder.flags: Int
         get() = getUserData(FLAGS) ?: DEFAULT_FLAGS

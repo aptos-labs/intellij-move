@@ -72,6 +72,7 @@ class CompleteParsingTest: MvParsingTestCase("complete") {
     fun `test public enum`() = doTest()
 
     fun `test assert macro`() = doTest()
+    fun `test proofs and lemmas`() = doTest()
 
     fun doTest() {
         super.doTest(true, true)

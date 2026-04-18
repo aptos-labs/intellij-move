@@ -147,6 +147,9 @@
         INVARIANT     = 'invariant_kw'
         AXIOM     = 'axiom_kw'
 
+        PROOF_KW     = 'proof_kw'
+        LEMMA_KW     = 'lemma_kw'
+
         PACK     = 'pack_kw'
         UNPACK     = 'unpack_kw'
         UPDATE     = 'update_kw'
@@ -1327,6 +1330,9 @@ private to ::= <<toKeyword>>
 private apply ::= <<applyKeyword>>
 private except ::= <<exceptKeyword>>
 
+private proof ::= <<proofKeyword>>
+private lemma ::= <<lemmaKeyword>>
+
 ModuleSpec ::= Attr* spec PathImpl ModuleSpecBlock
 {
     pin = "spec"
@@ -1359,7 +1365,7 @@ ModuleItemSpec ::= spec MODULE_KW <<msl SpecCodeBlock>>
         "org.move.lang.core.psi.ScopeMslOnlyElement"
     ]
 }
-ItemSpec ::= (spec !MODULE_KW) ItemSpecRef ItemSpecSignature? <<msl SpecCodeBlock>>
+ItemSpec ::= (spec !MODULE_KW) ItemSpecRef ItemSpecSignature? <<msl SpecCodeBlock>> Proof?
 {
     pin = 1
     implements = [
@@ -1450,7 +1456,7 @@ SpecCodeBlock ::= '{' ItemSpecBlock_items '}'
     ]
     mixin = "org.move.lang.core.psi.ext.MvSpecCodeBlockMixin"
 }
-private ItemSpecBlock_items ::= (SpecStmt | ExprStmt)* (SpecExprStmt_items | ExprStmt_expr)?
+private ItemSpecBlock_items ::= (Lemma | SpecStmt | ExprStmt)* (SpecExprStmt_items | ExprStmt_expr)?
 {
     recoverWhile = ItemSpecBlock_items_recover
 }
@@ -1750,6 +1756,14 @@ TypeQuantBinding ::= PatBinding TypeAscription {
     extends = QuantBinding
 }
 
+Proof ::= proof <<msl SpecCodeBlock>>
+{
+    pin = 1
+}
+Lemma ::= lemma IDENTIFIER TypeParameterList? FunctionParameterList <<msl SpecCodeBlock>> Proof?
+{
+    pin = 1
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Meta rules
