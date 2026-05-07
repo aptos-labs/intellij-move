@@ -31,8 +31,8 @@ version = pluginVersion
 plugins {
     id("java")
     kotlin("jvm") version "2.3.20"
-    id("org.jetbrains.intellij.platform") version "2.13.1"
-    id("org.jetbrains.intellij.platform.grammarkit") version "2.13.1"
+    id("org.jetbrains.intellij.platform") version "2.16.0"
+    id("org.jetbrains.intellij.platform.grammarkit") version "2.16.0"
 //    id("org.jetbrains.grammarkit") version "2023.3.0.3"
     id("net.saliman.properties") version "1.6.0"
 }
@@ -68,13 +68,13 @@ allprojects {
         testImplementation("org.opentest4j:opentest4j:1.3.0")
 
         intellijPlatform {
-            if (isLocal) {
-                local("/snap/rustrover/current")
-            } else {
-                create(prop("platformType"), prop("platformVersion")) {
-                    this.useInstaller = createUseInstaller
-                }
+            create(prop("platformType"), prop("platformVersion")) {
+                this.useInstaller = createUseInstaller
             }
+//            if (isLocal) {
+//                local("/snap/rustrover/current")
+//            } else {
+//            }
 
             pluginVerifier(Constraints.LATEST_VERSION)
             bundledPlugin("org.toml.lang")
