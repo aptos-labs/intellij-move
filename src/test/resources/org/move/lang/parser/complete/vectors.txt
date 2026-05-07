@@ -43,7 +43,7 @@ FILE
                 PsiElement(>)('>')
         PsiElement())(')')
       PsiWhiteSpace(' ')
-      MvCodeBlockImpl(CODE_BLOCK)
+      MvBlockExprImpl(BLOCK_EXPR)
         PsiElement({)('{')
         PsiWhiteSpace('\n        ')
         MvExprStmtImpl(EXPR_STMT)
