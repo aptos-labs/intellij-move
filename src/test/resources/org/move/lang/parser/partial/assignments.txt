@@ -12,7 +12,7 @@ FILE
         PsiElement(()('(')
         PsiElement())(')')
       PsiWhiteSpace(' ')
-      MvCodeBlockImpl(CODE_BLOCK)
+      MvBlockExprImpl(BLOCK_EXPR)
         PsiElement({)('{')
         PsiWhiteSpace('\n        ')
         MvLetStmtImpl(LET_STMT)
@@ -70,8 +70,6 @@ FILE
             MvValueArgumentListImpl(VALUE_ARGUMENT_LIST)
               PsiElement(()('(')
               PsiElement())(')')
-          PsiErrorElement:';' expected, got 'let'
-            <empty list>
         PsiWhiteSpace('\n        ')
         MvLetStmtImpl(LET_STMT)
           PsiElement(let)('let')

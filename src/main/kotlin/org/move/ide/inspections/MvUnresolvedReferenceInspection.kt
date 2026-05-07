@@ -131,7 +131,7 @@ class MvUnresolvedReferenceInspection: MvLocalInspectionTool() {
 
     private fun tryMultiResolveOrRegisterError(referenceElement: MvReferenceElement, holder: ProblemsHolder) {
         // no errors in pragmas
-        if (referenceElement.hasAncestor<MvPragmaSpecStmt>()) return
+        if (referenceElement.hasAncestor<MvPragmaStmt>()) return
 
         val reference = referenceElement.reference ?: return
 

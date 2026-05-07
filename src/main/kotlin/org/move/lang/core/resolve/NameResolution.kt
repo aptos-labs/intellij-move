@@ -191,9 +191,9 @@ fun getResolveScopes(start: MvElement): List<ResolveScope> {
     }
 }
 
-private fun getModuleItemSpecs(itemsOwner: MvItemsOwner, cameFrom: MvElement): List<MvSpecCodeBlock> {
+private fun getModuleItemSpecs(itemsOwner: MvItemsOwner, cameFrom: MvElement): List<MvBlockExpr> {
     val moduleItemSpecs = ModuleItemSpecs(itemsOwner).getResults()
-    return moduleItemSpecs.filter { it != cameFrom }.mapNotNull { it.itemSpecBlock }
+    return moduleItemSpecs.filter { it != cameFrom }.mapNotNull { it.codeBlock }
 }
 
 class ModuleItemSpecs(override val owner: MvItemsOwner): PsiCachedValueProvider<List<MvModuleItemSpec>> {

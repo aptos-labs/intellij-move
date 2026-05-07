@@ -63,16 +63,16 @@ class MvFoldingBuilder: CustomFoldingBuilder(), DumbAware {
         private val docCommentRanges: MutableList<TextRange>,
     ): MvVisitor() {
 
-        override fun visitCodeBlock(o: MvCodeBlock) = fold(o)
+        override fun visitBlockExpr(o: MvBlockExpr) = fold(o)
 
         override fun visitModule(o: MvModule) = foldBetween(o, o.lBrace, o.rBrace)
         override fun visitScript(o: MvScript) = foldBetween(o, o.lBrace, o.rBrace)
 
-        override fun visitSpecCodeBlock(block: MvSpecCodeBlock) {
-            if (block.children.isNotEmpty()) {
-                fold(block)
-            }
-        }
+//        override fun visitSpecCodeBlock(block: MvSpecCodeBlock) {
+//            if (block.children.isNotEmpty()) {
+//                fold(block)
+//            }
+//        }
 
         override fun visitAcquiresType(o: MvAcquiresType) = fold(o)
 

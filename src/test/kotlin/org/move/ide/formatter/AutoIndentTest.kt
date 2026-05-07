@@ -325,7 +325,7 @@ module 0x1::M {
     """
     )
 
-    fun `test if else block`() = doTestByText(
+    fun `test if else no else indent`() = doTestByText(
         """
         script {
             fun main() {
@@ -358,6 +358,27 @@ module 0x1::M {
                     a 
                 else 
                     /*caret*/b
+            }
+        }
+    """
+    )
+
+    fun `test if else body with block`() = doTestByText(
+        """
+        script {
+            fun main() {
+                if (true) 
+                    a 
+                else /*caret*/{ b }
+            }
+        }
+    """, """
+        script {
+            fun main() {
+                if (true) 
+                    a 
+                else 
+                { b }
             }
         }
     """

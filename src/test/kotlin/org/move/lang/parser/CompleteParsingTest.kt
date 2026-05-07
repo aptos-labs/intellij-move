@@ -73,6 +73,10 @@ class CompleteParsingTest: MvParsingTestCase("complete") {
 
     fun `test assert macro`() = doTest()
 
+    fun `test proofs`() = doTest()
+    fun `test if else with proof stmts`() = doTest()
+    fun `test forall apply lemma`() = doTest()
+
     fun doTest() {
         super.doTest(true, true)
     }

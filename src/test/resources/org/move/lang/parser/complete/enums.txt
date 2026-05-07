@@ -273,7 +273,7 @@ FILE
               PsiElement(IDENTIFIER)('Two')
         PsiElement())(')')
       PsiWhiteSpace(' ')
-      MvCodeBlockImpl(CODE_BLOCK)
+      MvBlockExprImpl(BLOCK_EXPR)
         PsiElement({)('{')
         PsiElement(})('}')
     PsiWhiteSpace('\n')

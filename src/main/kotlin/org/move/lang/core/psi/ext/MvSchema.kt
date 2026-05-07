@@ -8,7 +8,8 @@ import org.move.lang.core.types.infer.deepFoldTyTypeParameterWith
 import org.move.lang.core.types.infer.loweredType
 import org.move.lang.core.types.ty.TyUnknown
 
-val MvSchema.specBlock: MvSpecCodeBlock? get() = this.childOfType()
+//val MvSchema.codeBlock: MvBlockExpr? get() = this.childOfType()
+//val MvSchema.specBlock: MvSpecCodeBlock? get() = this.childOfType()
 
 val MvSchema.parentModule: MvModule?
     get() {
@@ -31,7 +32,9 @@ val MvSchema.requiredTypeParams: List<MvTypeParameter>
         return this.typeParameters.filter { it !in usedTypeParams }
     }
 
-val MvSchema.fieldStmts: List<MvSchemaFieldStmt> get() = this.specBlock?.schemaFields().orEmpty()
+val MvSchema.codeBlock: MvBlockExpr? get() = this.childOfType()
+
+val MvSchema.fieldStmts: List<MvSchemaFieldStmt> get() = this.codeBlock?.schemaFields().orEmpty()
 
 val MvSchema.fieldsAsBindings get() = this.fieldStmts.map { it.patBinding }
 

@@ -5,12 +5,11 @@ import com.intellij.psi.PsiElement
 import com.intellij.ui.breadcrumbs.BreadcrumbsProvider
 import org.move.lang.MoveLanguage
 import org.move.lang.core.psi.*
-import org.move.lang.core.psi.ext.expr
 import org.move.lang.core.types.fqName
 
-class MvBreadcrumbsProvider : BreadcrumbsProvider {
+class MvBreadcrumbsProvider: BreadcrumbsProvider {
 
-    private interface MvElementHandler<T : MvElement> {
+    private interface MvElementHandler<T: MvElement> {
         fun accepts(e: PsiElement): Boolean
         fun elementInfo(e: T): String
     }
@@ -28,19 +27,19 @@ class MvBreadcrumbsProvider : BreadcrumbsProvider {
         MvForHandler,
     )
 
-    private object MvNamedHandler : MvElementHandler<MvNamedElement> {
+    private object MvNamedHandler: MvElementHandler<MvNamedElement> {
         override fun accepts(e: PsiElement): Boolean = e is MvNamedElement
 
         override fun elementInfo(e: MvNamedElement): String = e.name.let { "$it" }
     }
 
-    private object MvModuleHandler : MvElementHandler<MvModule> {
+    private object MvModuleHandler: MvElementHandler<MvModule> {
         override fun accepts(e: PsiElement): Boolean = e is MvModule
 
         override fun elementInfo(e: MvModule): String = e.fqName()?.identifierText() ?: "null"
     }
 
-    private object MvModuleSpecHandler : MvElementHandler<MvModuleSpec> {
+    private object MvModuleSpecHandler: MvElementHandler<MvModuleSpec> {
         override fun accepts(e: PsiElement): Boolean = e is MvModuleSpec
 
         override fun elementInfo(e: MvModuleSpec): String {
@@ -51,7 +50,7 @@ class MvBreadcrumbsProvider : BreadcrumbsProvider {
         }
     }
 
-    private object MvItemSpecHandler : MvElementHandler<MvItemSpec> {
+    private object MvItemSpecHandler: MvElementHandler<MvItemSpec> {
         override fun accepts(e: PsiElement): Boolean = e is MvItemSpec
 
         override fun elementInfo(e: MvItemSpec): String {
@@ -62,19 +61,19 @@ class MvBreadcrumbsProvider : BreadcrumbsProvider {
         }
     }
 
-    private object MvFunctionHandler : MvElementHandler<MvFunction> {
+    private object MvFunctionHandler: MvElementHandler<MvFunction> {
         override fun accepts(e: PsiElement): Boolean = e is MvFunction
 
         override fun elementInfo(e: MvFunction): String = e.name.let { "$it()" }
     }
 
-    private object MvBlockHandler : MvElementHandler<MvCodeBlock> {
-        override fun accepts(e: PsiElement): Boolean = e is MvCodeBlock
+    private object MvBlockHandler: MvElementHandler<MvBlockExpr> {
+        override fun accepts(e: PsiElement): Boolean = e is MvBlockExpr
 
-        override fun elementInfo(e: MvCodeBlock): String = "{...}"
+        override fun elementInfo(e: MvBlockExpr): String = "{...}"
     }
 
-    private object MvIfHandler : MvElementHandler<MvIfExpr> {
+    private object MvIfHandler: MvElementHandler<MvIfExpr> {
         override fun accepts(e: PsiElement): Boolean = e is MvIfExpr
 
         override fun elementInfo(e: MvIfExpr): String {
@@ -82,7 +81,7 @@ class MvBreadcrumbsProvider : BreadcrumbsProvider {
                 append("if")
                 val condition = e.condition
                 if (condition != null) {
-                    if (condition.expr is MvCodeBlock) {
+                    if (condition.expr is MvBlockExpr) {
                         append(" {...}")
                     } else {
                         append(' ').append(condition.text.truncate(TextKind.INFO))
@@ -92,13 +91,13 @@ class MvBreadcrumbsProvider : BreadcrumbsProvider {
         }
     }
 
-    private object MvElseHandler : MvElementHandler<MvElseBlock> {
+    private object MvElseHandler: MvElementHandler<MvElseBlock> {
         override fun accepts(e: PsiElement): Boolean = e is MvElseBlock
 
         override fun elementInfo(e: MvElseBlock): String = "else"
     }
 
-    private object MvWhileHandler : MvElementHandler<MvWhileExpr> {
+    private object MvWhileHandler: MvElementHandler<MvWhileExpr> {
         override fun accepts(e: PsiElement): Boolean = e is MvWhileExpr
 
         override fun elementInfo(e: MvWhileExpr): String {
@@ -106,7 +105,7 @@ class MvBreadcrumbsProvider : BreadcrumbsProvider {
                 append("while")
                 val condition = e.condition
                 if (condition != null) {
-                    if (condition.expr is MvCodeBlock) {
+                    if (condition.expr is MvBlockExpr) {
                         append(" {...}")
                     } else {
                         append(' ').append(condition.text.truncate(TextKind.INFO))
@@ -116,7 +115,7 @@ class MvBreadcrumbsProvider : BreadcrumbsProvider {
         }
     }
 
-    private object MvForHandler : MvElementHandler<MvForExpr> {
+    private object MvForHandler: MvElementHandler<MvForExpr> {
         override fun accepts(e: PsiElement): Boolean = e is MvForExpr
 
         override fun elementInfo(e: MvForExpr): String {
@@ -129,7 +128,7 @@ class MvBreadcrumbsProvider : BreadcrumbsProvider {
                     if (binding != null) {
                         append(binding.text)
                     }
-                    append(" in ").append(condition.expr?.text?.truncate(TextKind.INFO))
+                    append(" in ").append(condition.rangeExpr?.text?.truncate(TextKind.INFO))
                     append(')')
                 }
             }

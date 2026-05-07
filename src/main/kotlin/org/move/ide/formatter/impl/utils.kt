@@ -38,9 +38,9 @@ val STRUCT_LITERAL_BLOCKS = ts(STRUCT_LIT_FIELDS_BLOCK)
 
 //val STRUCT_LITERAL_BLOCKS = ts(STRUCT_PAT_FIELDS_BLOCK, STRUCT_LIT_FIELDS_BLOCK)
 val DEF_BLOCKS = ts(
-    /*SCRIPT_BLOCK, */ADDRESS_BLOCK, /*MODULE_BLOCK, */CODE_BLOCK,
-    MODULE_SPEC_BLOCK, SPEC_CODE_BLOCK,
-    BLOCK_FIELDS, SCHEMA_FIELDS_BLOCK
+    /*SCRIPT_BLOCK, */ADDRESS_BLOCK, /*MODULE_BLOCK, *//*CODE_BLOCK*/
+    MODULE_SPEC_BLOCK, /*SPEC_CODE_BLOCK,*/
+    BLOCK_FIELDS, SCHEMA_FIELDS_BLOCK, BLOCK_EXPR,
 )
 
 val BLOCK_LIKE = orSet(STRUCT_LITERAL_BLOCKS, DEF_BLOCKS, ts(ENUM_BODY, MATCH_BODY))
@@ -59,10 +59,15 @@ fun ASTNode?.isWhitespaceOrEmpty() = this == null || textLength == 0 || elementT
 val PsiElement.isSpecStmt: Boolean
     get() = this is MvSchemaFieldStmt
             || this is MvGlobalVariableStmt
-            || this is MvPragmaSpecStmt
-            || this is MvUpdateSpecStmt
+            || this is MvPragmaStmt
+            || this is MvUpdateStmt
             || this is MvIncludeStmt
             || this is MvApplySchemaStmt
+            || this is MvConditionPredicateStmt
+            || this is MvInvariantStmt
+            || this is MvAxiomStmt
+            || this is MvAbortsIfStmt
+            || this is MvAbortsWithStmt
 
 val PsiElement.isTopLevelItem: Boolean
     get() = (this is MvModule || this is MvAddressDef || this is MvScript || this is MvModuleSpec)
@@ -76,10 +81,10 @@ val PsiElement.isDeclarationItem: Boolean
     get() = (this is MvModule && parent is MvAddressBlock) || this.isModuleItem
 
 val PsiElement.isStmt: Boolean
-    get() = this is MvStmt && parent is MvCodeBlock
+    get() = this is MvStmt && parent is MvBlockExpr
 
 val PsiElement.isStmtOrExpr: Boolean
-    get() = this is MvStmt || this is MvExpr && parent is MvCodeBlock
+    get() = this is MvStmt || this is MvExpr && parent is MvBlockExpr
 
 fun ASTNode.isDelimiterOfCurrentBlock(parent: ASTNode?): Boolean {
     if (parent == null) return false

@@ -17,7 +17,7 @@ fun prop(name: String): String =
 
 val shortPlatformVersion = prop("shortPlatformVersion")
 val createUseInstaller = prop("useInstaller").toBooleanStrict()
-val codeVersion = "1.52.0"
+val codeVersion = "1.53.0"
 
 val pluginVersion = "$codeVersion.$shortPlatformVersion"
 val pluginGroup = "org.move"
@@ -68,13 +68,13 @@ allprojects {
         testImplementation("org.opentest4j:opentest4j:1.3.0")
 
         intellijPlatform {
-            if (isLocal) {
-                local("/snap/rustrover/current")
-            } else {
-                create(prop("platformType"), prop("platformVersion")) {
-                    this.useInstaller = createUseInstaller
-                }
+            create(prop("platformType"), prop("platformVersion")) {
+                this.useInstaller = createUseInstaller
             }
+//            if (isLocal) {
+//                local("/snap/rustrover/current")
+//            } else {
+//            }
 
             pluginVerifier(Constraints.LATEST_VERSION)
             bundledPlugin("org.toml.lang")

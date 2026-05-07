@@ -5,6 +5,7 @@ import com.intellij.lang.ASTNode
 import org.move.ide.formatter.MoveFmtBlock
 import org.move.ide.formatter.MvFmtContext
 import org.move.lang.MvElementTypes.*
+import org.move.lang.core.psi.MvBlockExpr
 import org.move.lang.core.psi.MvExpr
 
 fun MoveFmtBlock.computeIndent(child: ASTNode, childCtx: MvFmtContext): Indent? {
@@ -19,15 +20,16 @@ fun MoveFmtBlock.computeIndent(child: ASTNode, childCtx: MvFmtContext): Indent? 
         // }
         parentType == ADDRESS_BLOCK -> Indent.getNoneIndent()
 
+        // do not indent else block
+        child.elementType == ELSE_BLOCK
+                || child.elementType == ELSE -> Indent.getNoneIndent()
+
         // indent inline block in else block
         // if (true)
         // else
         //     2 + 2;
         parentType == ELSE_BLOCK
-                && child.elementType == INLINE_BLOCK -> Indent.getContinuationIndent()
-
-        // do not indent else block
-        child.elementType == ELSE_BLOCK -> Indent.getNoneIndent()
+                && child.elementType != BLOCK_EXPR -> Indent.getContinuationIndent()
 
         // indent every child of the block except for braces
         // module M {

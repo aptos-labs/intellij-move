@@ -9,7 +9,7 @@ import org.move.lang.core.psi.psiFactory
 class AddAcquiresFix(
     function: MvFunction,
     val missingItems: List<String>
-) :
+):
     DiagnosticFix<MvFunction>(function) {
 
     override fun getFamilyName(): String = "Add missing acquires"

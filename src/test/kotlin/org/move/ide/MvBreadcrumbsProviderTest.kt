@@ -34,6 +34,7 @@ class MvBreadcrumbsProviderTest : MvTestBase() {
     """, """
         spec: 0x1::m
         spec: main
+        {...}
     """
     )
 

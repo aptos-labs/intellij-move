@@ -5,8 +5,14 @@ import org.move.lang.core.resolve.scopeEntry.ScopeEntry
 import org.move.lang.core.resolve.scopeEntry.asEntries
 
 interface MvItemsOwner: MvElement {
-    val useStmtList: List<MvUseStmt>
+    //    val useStmtList: List<MvUseStmt>
+//    val stmtList: List<MvStmt>
 }
+
+val MvItemsOwner.useStmtList: List<MvUseStmt>
+    get() {
+        return this.childrenOfType<MvUseStmt>()
+    }
 
 fun MvItemsOwner.items(): Sequence<MvElement> {
     val startChild = when (this) {
@@ -19,7 +25,7 @@ fun MvItemsOwner.items(): Sequence<MvElement> {
 
 val MvModuleItemSpec.globalVariableEntries: List<ScopeEntry>
     get() {
-        return this.itemSpecBlock?.globalVariables().orEmpty().asEntries()
+        return this.codeBlock?.globalVariables().orEmpty().asEntries()
     }
 
 val MvModule.globalVariableEntries: List<ScopeEntry>

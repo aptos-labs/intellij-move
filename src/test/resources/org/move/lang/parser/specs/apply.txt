@@ -11,7 +11,7 @@ FILE
       PsiWhiteSpace(' ')
       PsiElement(module)('module')
       PsiWhiteSpace(' ')
-      MvSpecCodeBlockImpl(SPEC_CODE_BLOCK)
+      MvBlockExprImpl(BLOCK_EXPR)
         PsiElement({)('{')
         PsiWhiteSpace('\n        ')
         MvApplySchemaStmtImpl(APPLY_SCHEMA_STMT)
