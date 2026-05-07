@@ -1240,7 +1240,7 @@ module 0x1::pool {
                 aborts_if true with 1;
                 aborts_if true with 1u8;
                 aborts_if true with 1u64;
-                aborts_if true with <error descr="Incompatible type 'bool', expected 'integer'">false</error>;
+                aborts_if true with <error descr="Incompatible type 'bool', expected 'num'">false</error>;
             }
         }        
     """
@@ -1251,7 +1251,7 @@ module 0x1::pool {
         module 0x1::m {
             fun call() {}
             spec call {
-                aborts_with <error descr="Incompatible type 'bool', expected 'integer'">false</error>;
+                aborts_with <error descr="Incompatible type 'bool', expected 'num'">false</error>;
             }
         }
     """

@@ -13,7 +13,7 @@ import org.move.utils.psiCacheResult
 
 fun getEntriesInScope(scope: MvElement, cameFrom: MvElement, ns: NsSet): List<ScopeEntry> {
     return when (scope) {
-        is MvCodeBlock, is MvSpecCodeBlock, is MvMatchArm -> getEntriesInBlocks(scope, cameFrom, ns)
+        is MvBlockExpr, is MvMatchArm -> getEntriesInBlocks(scope, cameFrom, ns)
         else -> {
             getEntriesInResolveScopes(scope)
         }
@@ -23,20 +23,20 @@ fun getEntriesInScope(scope: MvElement, cameFrom: MvElement, ns: NsSet): List<Sc
 private fun getEntriesInBlocks(scope: MvElement, cameFrom: MvElement, ns: NsSet): List<ScopeEntry> {
     return buildList {
         if (Ns.NAME in ns) {
+            val msl = scope.isMsl()
             when (scope) {
-                is MvCodeBlock -> {
-                    val (letBindings, _) = getVisibleLetPatBindingsWithShadowing(scope, cameFrom)
-                    addAll(letBindings)
-                }
-
-                is MvSpecCodeBlock -> {
-                    val (letBindings, visited) = getVisibleLetPatBindingsWithShadowing(scope, cameFrom)
+                is MvBlockExpr if msl -> {
+                    val (letBindings, visited) = getVisibleLetPatBindingsWithShadowing(scope, cameFrom, true)
                     addAll(letBindings)
 
                     val specBlockEntries = SpecCodeBlockNonBindings(scope).getResults()
                     addAll(
                         specBlockEntries.filter { it.name !in visited }
                     )
+                }
+                is MvBlockExpr -> {
+                    val (letBindings, _) = getVisibleLetPatBindingsWithShadowing(scope, cameFrom, false)
+                    addAll(letBindings)
                 }
 
                 is MvMatchArm -> {
@@ -54,7 +54,7 @@ private fun getEntriesInBlocks(scope: MvElement, cameFrom: MvElement, ns: NsSet)
     }
 }
 
-class SpecCodeBlockNonBindings(override val owner: MvSpecCodeBlock): PsiCachedValueProvider<List<ScopeEntry>> {
+class SpecCodeBlockNonBindings(override val owner: MvBlockExpr): PsiCachedValueProvider<List<ScopeEntry>> {
     override fun compute(): CachedValueProvider.Result<List<ScopeEntry>> {
         val entries = buildList {
 //            addAll(owner.builtinSpecConsts().asEntries())
@@ -151,16 +151,12 @@ private fun getEntriesInResolveScopes(scope: MvElement): List<ScopeEntry> {
 private fun getVisibleLetPatBindingsWithShadowing(
     scope: MvElement,
     stmtOrTailExpr: MvElement,
+    msl: Boolean
 ): Pair<List<ScopeEntry>, MutableSet<String>> {
     val visibleLetStmts = when (scope) {
-        is MvCodeBlock -> {
-            BlockLetStmts(scope).getResults()
-                // drops all let-statements after the current position
-                .filter { it.first.strictlyBefore(stmtOrTailExpr) }
-        }
-        is MvSpecCodeBlock -> {
+        is MvBlockExpr if msl -> {
             val currentLetStmt = stmtOrTailExpr as? MvLetStmt
-            val allLetStmts = BlockLetStmts(scope).getResults()
+            val allLetStmts = BlockExprLetStmts(scope).getResults()
             when {
                 currentLetStmt != null -> {
                     // if post = true, then both pre and post are accessible, else only pre
@@ -175,6 +171,11 @@ private fun getVisibleLetPatBindingsWithShadowing(
                 }
                 else -> allLetStmts
             }
+        }
+        is MvBlockExpr -> {
+            BlockExprLetStmts(scope).getResults()
+                // drops all let-statements after the current position
+                .filter { it.first.strictlyBefore(stmtOrTailExpr) }
         }
         else -> error("unreachable")
     }
@@ -193,7 +194,8 @@ private fun getVisibleLetPatBindingsWithShadowing(
     return bindings to visited
 }
 
-class BlockLetStmts(override val owner: AnyCodeBlock): PsiCachedValueProvider<List<Pair<MvLetStmt, List<ScopeEntry>>>> {
+class BlockExprLetStmts(override val owner: MvBlockExpr):
+    PsiCachedValueProvider<List<Pair<MvLetStmt, List<ScopeEntry>>>> {
     override fun compute(): CachedValueProvider.Result<List<Pair<MvLetStmt, List<ScopeEntry>>>> {
         val letStmts = owner.stmtList.filterIsInstance<MvLetStmt>()
             .map {

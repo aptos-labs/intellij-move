@@ -52,7 +52,7 @@ object MvPsiPattern {
 
     fun codeStatementPattern(): PsiElementPattern.Capture<PsiElement> =
         psiElement()
-            .inside(psiElement<MvCodeBlock>())
+            .inside(psiElement<MvBlockExpr>())
             .andNot(psiElement().withParent(MvModule::class.java))
             .andNot(psiElement().withSuperParent(3, MvStructLitExpr::class.java))
             // let S { field } = 1
@@ -62,11 +62,17 @@ object MvPsiPattern {
 
     fun anySpecStart() = psiElementInside<MvItemSpec>().and(onStatementBeginning("spec"))
 
-    fun itemSpecStmt(): PsiElementPattern.Capture<PsiElement> = psiElementInside<MvSpecCodeBlock>()
+    fun itemSpecStmt(): PsiElementPattern.Capture<PsiElement> =
+        psiElement().inside(
+            or(
+                psiElement<MvModuleItemSpec>(),
+                psiElement<MvItemSpec>()
+            )
+        )
 
-    fun itemSpecRef(): PsiElementPattern.Capture<PsiElement> = psiElementWithParent<MvItemSpecRef>()
+//    fun itemSpecRef(): PsiElementPattern.Capture<PsiElement> = psiElementWithParent<MvItemSpecRef>()
 
-    fun bindingPat(): PsiElementPattern.Capture<PsiElement> = psiElementWithParent<MvPatBinding>()
+//    fun bindingPat(): PsiElementPattern.Capture<PsiElement> = psiElementWithParent<MvPatBinding>()
 
     fun namedAddress(): PsiElementPattern.Capture<MvNamedAddress> = psiElement<MvNamedAddress>()
 
@@ -150,7 +156,7 @@ object MvPsiPattern {
     val inAnyLoop: PsiElementPattern.Capture<PsiElement> =
         psiElement().inside(
             true,
-            psiElement<MvCodeBlock>().withParent(
+            psiElement<MvBlockExpr>().withParent(
                 or(
                     psiElement<MvForExpr>(),
                     psiElement<MvLoopExpr>(),

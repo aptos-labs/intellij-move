@@ -3,7 +3,7 @@ package org.move.lang.core.resolve.scopeEntry
 import com.intellij.psi.util.CachedValueProvider
 import org.move.lang.core.psi.NamedItemScope
 import org.move.lang.core.psi.ext.MvItemsOwner
-import org.move.lang.core.resolve.ref.MODULES
+import org.move.lang.core.psi.ext.useStmtList
 import org.move.lang.core.resolve.ref.Ns
 import org.move.lang.index.MvItemNamespaceIndex
 import org.move.lang.moveProject

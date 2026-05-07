@@ -14,7 +14,7 @@ fun ImportCandidate.import(context: MvElement) {
     checkWriteAccessAllowed()
     val insertionScope = context
         .ancestorsOfType<MvItemsOwner>()
-        .filter { it !is MvCodeBlock && it !is MvSpecCodeBlock }.firstOrNull() ?: return
+        .firstOrNull { it !is MvBlockExpr } ?: return
     val insertTestOnly =
         insertionScope.usageScope == NamedItemScope.MAIN
                 && context.usageScope == NamedItemScope.TEST

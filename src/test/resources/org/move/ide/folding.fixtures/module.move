@@ -18,7 +18,7 @@ module 0x1::M <fold text='{...}'>{
         assert true;
     }</fold>
 
-    spec module {}
+    spec module <fold text='{...}'>{}</fold>
 
     <fold text='/* ... */'>/// my docstring
     /// my other docstring</fold>

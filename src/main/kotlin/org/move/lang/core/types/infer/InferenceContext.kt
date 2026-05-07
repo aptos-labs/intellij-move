@@ -170,14 +170,21 @@ class InferenceContext(
         }
 
         when (owner) {
-            is MvFunctionLike -> owner.anyCodeBlock?.let {
-                inference.inferCodeBlock(it)
+            is MvFunctionLike -> owner.codeBlock?.let {
+                inference.inferBlockExpr(it, Expected.fromType(inference.expectedReturnTy))
+//                inference.inferBlockExpr()
+//                inference.inferCodeBlock(it)
             }
             is MvItemSpec -> {
-                owner.itemSpecBlock?.let { inference.inferSpecBlock(it) }
+                owner.codeBlock?.let { inference.inferMslBlockExpr(it, Expected.NoValue) }
             }
-            is MvModuleItemSpec -> owner.itemSpecBlock?.let { inference.inferSpecBlock(it) }
-            is MvSchema -> owner.specBlock?.let { inference.inferSpecBlock(it) }
+            is MvModuleItemSpec -> owner.codeBlock?.let {
+                inference.inferMslBlockExpr(it, Expected.NoValue)
+            }
+            is MvSchema -> owner.codeBlock?.let {
+                inference.inferMslBlockExpr(it, Expected.NoValue)
+//                inference.inferSpecBlock(it)
+            }
         }
 
         //  1. collect lambda expr bodies while inferring the context
@@ -197,9 +204,10 @@ class InferenceContext(
                     inference.inferExprType(it)
                 }
             }
-            val inlineSpecBlock = lambdaExpr.specExpr
+            val inlineSpecBlock = lambdaExpr.inlineSpecBlock
             if (inlineSpecBlock != null) {
-                inference.inferSpecBlockExprTy(inlineSpecBlock)
+                inference.inferInlineSpecBlock(inlineSpecBlock)
+//                inference.inferSpecBlockExprTy(inlineSpecBlock)
             }
         }
 

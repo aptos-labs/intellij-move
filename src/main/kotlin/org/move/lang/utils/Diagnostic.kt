@@ -125,9 +125,9 @@ sealed class Diagnostic(
             specFunction,
             TextRange.create(
                 specFunction.functionParameterList?.endOffset
-                    ?: specFunction.specCodeBlock?.startOffset
+                    ?: specFunction.codeBlock?.startOffset
                     ?: specFunction.startOffset,
-                (specFunction.specCodeBlock?.startOffset?.plus(1)) ?: specFunction.endOffset
+                (specFunction.codeBlock?.startOffset?.plus(1)) ?: specFunction.endOffset
             )
         ) {
 

@@ -3,7 +3,6 @@ package org.move.lang.core.types.infer
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
-import fleet.fastutil.skip
 import org.move.cli.settings.debugErrorOrFallback
 import org.move.cli.settings.isDebugModeEnabled
 import org.move.cli.settings.moveSettings
@@ -11,6 +10,7 @@ import org.move.ide.formatter.impl.location
 import org.move.lang.core.completion.providers.dropInvisibleEntries
 import org.move.lang.core.psi.*
 import org.move.lang.core.psi.ext.*
+import org.move.lang.core.psi.ext.post
 import org.move.lang.core.resolve.getEntriesFromWalkingScopes
 import org.move.lang.core.resolve.getFieldLookupResolveVariants
 import org.move.lang.core.resolve.getMethodResolveVariants
@@ -28,7 +28,7 @@ import org.move.stdext.chain
 class TypePsiWalker(
     val ctx: InferenceContext,
     val project: Project,
-    private val expectedReturnTy: Ty
+    val expectedReturnTy: Ty
 ) {
     val msl: Boolean get() = ctx.msl
 
@@ -76,86 +76,167 @@ class TypePsiWalker(
         }
     }
 
-    fun inferCodeBlock(block: AnyCodeBlock): Ty =
-        block.inferBlockType(Expected.fromType(expectedReturnTy), coerce = true)
+//    fun inferReturningBlockExpr(blockExpr: MvBlockExpr) {
+//        val expected = Expected.fromType(expectedReturnTy)
+//        inferBlockExpr(blockExpr, expected)
+//    }
 
-    fun inferSpecBlock(block: AnyCodeBlock): Ty =
-        mslScope { block.inferBlockType(NoValue, coerce = false) }
+    fun inferMslBlockExpr(blockExpr: MvBlockExpr, expected: Expected): Ty {
+        return mslScope { inferBlockExpr(blockExpr, expected) }
+    }
 
-    private fun AnyCodeBlock.inferBlockType(expected: Expected, coerce: Boolean): Ty {
-        val stmts = when (this) {
-            is MvSpecCodeBlock, is MvModuleSpecBlock -> {
-                // reorder stmts, move let stmts to the top, then let post, then others
-                this.stmtList.sortedBy {
-                    when {
-                        it is MvLetStmt && !it.post -> 0
-                        it is MvLetStmt && it.post -> 1
-                        else -> 2
-                    }
+    fun inferBlockExpr(blockExpr: MvBlockExpr, expected: Expected): Ty {
+        val stmts = if (this.msl) {
+            // reorder stmts, move let stmts to the top, then let post, then others
+            blockExpr.stmtListNoTailExpr.sortedBy {
+                when (it) {
+                    is MvLetStmt if !it.post -> 0
+                    is MvLetStmt if it.post -> 1
+                    else -> 2
                 }
             }
-            else -> this.stmtList
+        } else {
+            blockExpr.stmtListNoTailExpr
         }
         stmts.forEach { processStmt(it) }
 
-        val tailExpr = this.expr
+        val tailExpr = blockExpr.tailExpr
+//        ctx.getExprType(tailExpr)
         val expectedTy = expected.ty(ctx)
-        return if (tailExpr == null) {
-            if (coerce && expectedTy != null) {
-                coerceTypes(this.rBrace ?: this, TyUnit, expectedTy)
+        val blockExprTy = if (tailExpr == null) {
+//            if (coerce && expectedTy != null) {
+//            }
+            if (expectedTy != null) {
+                coerceTypes(blockExpr.rBrace ?: blockExpr, TyUnit, expectedTy)
             }
             TyUnit
         } else {
-            if (coerce && expectedTy != null) {
+            if (expectedTy != null) {
                 tailExpr.inferTypeCoerceTo(expectedTy)
             } else {
                 tailExpr.inferType(expectedTy)
             }
+//            ctx.getExprType(tailExpr)
+//            if (coerce && expectedTy != null) {
+//                tailExpr.inferTypeCoerceTo(expectedTy)
+//            } else {
+//            }
         }
+        ctx.writeExprTy(blockExpr, blockExprTy)
+        return blockExprTy
     }
+
+//    fun inferCodeBlock(block: AnyCodeBlock): Ty =
+//        block.inferBlockType(Expected.fromType(expectedReturnTy), coerce = true)
+
+//    fun inferSpecBlock(block: AnyCodeBlock): Ty =
+//        mslScope { block.inferBlockType(NoValue, coerce = false) }
+
+//    private fun AnyCodeBlock.inferBlockType(expected: Expected, coerce: Boolean): Ty {
+//        val stmts = when (this) {
+//            is MvSpecCodeBlock, is MvModuleSpecBlock -> {
+//                // reorder stmts, move let stmts to the top, then let post, then others
+//                this.stmtList.sortedBy {
+//                    when {
+//                        it is MvLetStmt && !it.post -> 0
+//                        it is MvLetStmt && it.post -> 1
+//                        else -> 2
+//                    }
+//                }
+//            }
+//            else -> this.stmtList
+//        }
+//        stmts.forEach { processStmt(it) }
+//
+//        val tailExpr = this.tailExpr
+//        val expectedTy = expected.ty(ctx)
+//        return if (tailExpr == null) {
+//            if (coerce && expectedTy != null) {
+//                coerceTypes(this.rBrace ?: this, TyUnit, expectedTy)
+//            }
+//            TyUnit
+//        } else {
+//            if (coerce && expectedTy != null) {
+//                tailExpr.inferTypeCoerceTo(expectedTy)
+//            } else {
+//                tailExpr.inferType(expectedTy)
+//            }
+//        }
+//    }
 
     fun resolveTypeVarsIfPossible(ty: Ty): Ty = ctx.resolveTypeVarsIfPossible(ty)
 
     private fun processStmt(stmt: MvStmt) {
         when (stmt) {
-            is MvLetStmt -> {
-                val explicitTy = stmt.type?.loweredType(msl)
-                val expr = stmt.initializer?.expr
-                val pat = stmt.pat
-                val initializerTy =
-                    if (expr != null) {
-                        val initializerTy = expr.inferType(explicitTy)
-                        when {
-                            explicitTy != null -> {
-//                                coerceTypes(expr, initializerTy, explicitTy);
-//                                explicitTy
-                                if (coerceTypes(expr, initializerTy, explicitTy)) {
-                                    explicitTy
-                                } else {
-                                    initializerTy
-                                }
-                            }
-                            else -> initializerTy
-                        }
-                    } else {
-                        pat?.anonymousTyVar() ?: TyUnknown
-                    }
-                pat?.collectBindings(
-                    this,
-                    explicitTy ?: resolveTypeVarsIfPossible(initializerTy)
-                )
-            }
+            is MvLetStmt -> processLetStmt(stmt)
             is MvSchemaFieldStmt -> {
                 val binding = stmt.patBinding
                 val ty = stmt.type?.loweredType(msl) ?: TyUnknown
                 ctx.writePatTy(binding, resolveTypeVarsIfPossible(ty))
             }
             is MvIncludeStmt -> inferIncludeStmt(stmt)
-            is MvUpdateSpecStmt -> inferUpdateStmt(stmt)
+            is MvUpdateStmt -> inferUpdateStmt(stmt)
             is MvExprStmt -> stmt.expr.inferType()
-            is MvSpecExprStmt -> stmt.expr.inferType()
-            is MvPragmaSpecStmt -> {
+            is MvPragmaStmt -> {
                 stmt.pragmaAttributeList.forEach { it.expr?.inferType() }
+            }
+            is MvConditionPredicateStmt -> processConditionPredicateStmt(stmt)
+            is MvInvariantStmt -> stmt.expr?.inferTypeCoercableTo(TyBool)
+            is MvAxiomStmt -> stmt.expr?.inferTypeCoercableTo(TyBool)
+            is MvGlobalVariableStmt -> stmt.expr?.inferType()
+            is MvAbortsIfStmt -> {
+                stmt.expr?.inferTypeCoercableTo(TyBool)
+                stmt.abortsIfWith?.expr?.inferTypeCoercableTo(TyNum)
+            }
+            is MvAbortsWithStmt -> {
+                stmt.exprList.forEach { it.inferTypeCoercableTo(TyNum) }
+            }
+            // no-op
+            is MvUseStmt,
+            is MvSpecInlineFunctionStmt -> Unit
+            else -> error("unimplemented yet ${stmt.elementType}")
+        }
+    }
+
+    private fun processLetStmt(stmt: MvLetStmt) {
+        val explicitTy = stmt.type?.loweredType(msl)
+        val expr = stmt.initializer?.expr
+        val pat = stmt.pat
+        val initializerTy =
+            if (expr != null) {
+                val initializerTy = expr.inferType(explicitTy)
+                when {
+                    explicitTy != null -> {
+                        if (coerceTypes(expr, initializerTy, explicitTy)) {
+                            explicitTy
+                        } else {
+                            initializerTy
+                        }
+                    }
+                    else -> initializerTy
+                }
+            } else {
+                pat?.anonymousTyVar() ?: TyUnknown
+            }
+        pat?.collectBindings(
+            this,
+            explicitTy ?: resolveTypeVarsIfPossible(initializerTy)
+        )
+    }
+
+    private fun processConditionPredicateStmt(predicateStmt: MvConditionPredicateStmt) {
+        val predicateExpr = predicateStmt.expr ?: return
+        val kind = predicateStmt.kind
+        when (kind) {
+            SpecPredicateKind.ASSERT,
+            SpecPredicateKind.ASSUME,
+            SpecPredicateKind.REQUIRES,
+            SpecPredicateKind.ENSURES,
+            SpecPredicateKind.DECREASES -> {
+                predicateExpr.inferTypeCoercableTo(TyBool)
+            }
+            SpecPredicateKind.MODIFIES -> {
+                predicateExpr.inferType()
             }
         }
     }
@@ -237,7 +318,8 @@ class TypePsiWalker(
             is MvMoveExpr -> expr.expr?.inferType() ?: TyUnknown
             is MvCopyExpr -> expr.expr?.inferType() ?: TyUnknown
 
-            is MvSpecBlockExpr -> inferSpecBlockExprTy(expr)
+            is MvBlockExpr -> inferBlockExpr(expr, expected)
+            is MvInlineSpecBlockExpr -> inferInlineSpecBlock(expr.inlineSpecBlock)
 
             is MvCastExpr -> {
                 expr.expr.inferType()
@@ -272,19 +354,9 @@ class TypePsiWalker(
             is MvContinueExpr -> TyNever
             is MvBreakExpr -> TyNever
             is MvAbortExpr -> inferAbortExpr(expr)
-            is MvCodeBlockExpr -> expr.codeBlock.inferBlockType(expected, coerce = true)
             is MvAssignmentExpr -> inferAssignmentExprTy(expr)
-            is MvBoolSpecExpr -> inferBoolSpecExpr(expr)
             is MvQuantExpr -> inferQuantExprTy(expr)
             is MvRangeExpr -> inferRangeExprTy(expr)
-            is MvModifiesSpecExpr -> {
-                expr.expr?.inferType()
-                TyUnit
-            }
-            is MvAbortsWithSpecExpr -> {
-                expr.exprList.forEach { it.inferTypeCoercableTo(TyInteger.DEFAULT) }
-                TyUnit
-            }
 
             is MvMatchExpr -> inferMatchExprTy(expr)
 
@@ -295,7 +367,6 @@ class TypePsiWalker(
         ctx.writeExprTy(expr, refinedExprTy)
 
         return this.resolveTypeVarsIfPossible(refinedExprTy)
-//        return refinedExprTy
     }
 
     private fun inferAbortExpr(abortExpr: MvAbortExpr): Ty {
@@ -312,14 +383,6 @@ class TypePsiWalker(
             )
         }
         return TyNever
-    }
-
-    private fun inferBoolSpecExpr(expr: MvBoolSpecExpr): Ty {
-        expr.expr?.inferTypeCoercableTo(TyBool)
-        if (expr is MvAbortsIfSpecExpr) {
-            expr.abortsIfWith?.expr?.inferTypeCoercableTo(TyInteger.DEFAULT)
-        }
-        return TyUnit
     }
 
     private fun inferPathExprTy(pathExpr: MvPathExpr, expected: Expected): Ty {
@@ -463,11 +526,7 @@ class TypePsiWalker(
     private fun instantiateAdtAsTyCallable(path: MvPath, tyAdt: TyAdt): TyCallable? {
         val adtItem = tyAdt.adtItem
         val fieldsOwner: MvFieldsOwner = when (adtItem) {
-            is MvStruct -> {
-                adtItem
-//                val tupleFields = adtItem.tupleFields ?: return null
-//                instantiateTupleFuncTy(tupleFields, path, adtItem)
-            }
+            is MvStruct -> adtItem
             is MvEnum -> {
                 val variant = this.ctx.resolvedPaths[path]?.singleOrNull()?.element as? MvEnumVariant
                 variant ?: return null
@@ -728,10 +787,20 @@ class TypePsiWalker(
         return TyUnit
     }
 
-    fun inferSpecBlockExprTy(specBlockExpr: MvSpecBlockExpr): Ty {
-        val specBlock = specBlockExpr.specBlock
-        if (specBlock != null) {
-            inferSpecBlock(specBlock)
+//    fun inferSpecBlockExprTy(specBlockExpr: MvSpecBlockExpr): Ty {
+//        val specBlock = specBlockExpr.specBlock
+//        if (specBlock != null) {
+//            mslScope { block.inferBlockType(NoValue, coerce = false) }
+////            inferSpecBlock(specBlock)
+//        }
+//        return TyUnit
+//    }
+
+    fun inferInlineSpecBlock(inlineSpecBlock: MvInlineSpecBlock): Ty {
+        val bodyExpr = inlineSpecBlock.bodyExpr
+        if (bodyExpr != null) {
+            inferMslBlockExpr(bodyExpr, NoValue)
+//            inferSpecBlock(specBlock)
         }
         return TyUnit
     }
@@ -1171,14 +1240,18 @@ class TypePsiWalker(
 
     private fun inferIfExprTy(ifExpr: MvIfExpr, expected: Expected): Ty {
         ifExpr.condition?.expr?.inferTypeCoercableTo(TyBool)
-        val actualIfTy =
-            ifExpr.codeBlock?.inferBlockType(expected, coerce = true)
-                ?: ifExpr.inlineBlock?.expr?.inferTypeCoercableTo(expected)
+
+        val actualIfTy = ifExpr.bodyExpr?.inferTypeCoercableTo(expected)
+//        inferExprTypeCoercableTo(ifExpr.bodyExpr, expected)
+//        val actualIfTy =
+//            ifExpr.codeBlock?.inferBlockType(expected, coerce = true)
+//                ?: ifExpr.inlineBlock?.expr?.inferTypeCoercableTo(expected)
         val elseBlock = ifExpr.elseBlock ?: return TyUnit
         // todo: this line should not coerce
-        val actualElseTy =
-            elseBlock.codeBlock?.inferBlockType(expected, coerce = true)
-                ?: elseBlock.inlineBlock?.expr?.inferTypeCoercableTo(expected)
+        val actualElseTy = elseBlock.bodyExpr?.inferTypeCoercableTo(expected)
+//        val actualElseTy =
+//            elseBlock.codeBlock?.inferBlockType(expected, coerce = true)
+//                ?: elseBlock.inlineBlock?.expr?.inferTypeCoercableTo(expected)
 
         val expectedElseTy = expected.ty(ctx) ?: actualIfTy ?: TyUnknown
         if (actualElseTy != null) {
@@ -1228,21 +1301,21 @@ class TypePsiWalker(
         if (conditionExpr != null) {
             conditionExpr.inferTypeCoercableTo(TyBool)
         }
-        val inlineSpecBlock = whileExpr.specBlockExpr
+        val inlineSpecBlock = whileExpr.inlineSpecBlock
         if (inlineSpecBlock != null) {
-            inferSpecBlockExprTy(inlineSpecBlock)
+            inferInlineSpecBlock(inlineSpecBlock)
         }
-        return inferLoopLikeBlock(whileExpr)
+        return inferLoopBodyExpr(whileExpr)
     }
 
     private fun inferLoopExpr(loopExpr: MvLoopExpr): Ty {
-        return inferLoopLikeBlock(loopExpr)
+        return inferLoopBodyExpr(loopExpr)
     }
 
     private fun inferForExpr(forExpr: MvForExpr): Ty {
         val iterCondition = forExpr.forIterCondition
         if (iterCondition != null) {
-            val rangeExpr = iterCondition.expr
+            val rangeExpr = iterCondition.rangeExpr
             val bindingTy =
                 if (rangeExpr != null) {
                     val rangeTy = rangeExpr.inferType() as? TyRange
@@ -1255,22 +1328,23 @@ class TypePsiWalker(
                 this.ctx.writePatTy(bindingPat, bindingTy)
             }
 
-            val innerSpecBlock = iterCondition.specExpr
-            if (innerSpecBlock != null) {
-                inferSpecBlockExprTy(innerSpecBlock)
+            val inlineSpecBlock = iterCondition.inlineSpecBlock
+            if (inlineSpecBlock != null) {
+                inferInlineSpecBlock(inlineSpecBlock)
             }
         }
-        return inferLoopLikeBlock(forExpr)
+        return inferLoopBodyExpr(forExpr)
     }
 
-    private fun inferLoopLikeBlock(loopLike: MvLoopLike): Ty {
-        val codeBlock = loopLike.codeBlock
-        val inlineBlockExpr = loopLike.inlineBlock?.expr
-        val expected = Expected.fromType(TyUnit)
-        when {
-            codeBlock != null -> codeBlock.inferBlockType(expected, coerce = false)
-            inlineBlockExpr != null -> inlineBlockExpr.inferType(expected)
-        }
+    private fun inferLoopBodyExpr(loopLike: MvLoopLike): Ty {
+        val bodyExpr = loopLike.bodyExpr
+        bodyExpr?.inferType(Expected.fromType(TyUnit))
+//        val inlineBlockExpr = loopLike.inlineBlock?.expr
+//        val expected = Expected.fromType(TyUnit)
+//        when {
+//            bodyExpr != null -> bodyExpr.inferBlockType(expected, coerce = false)
+//            inlineBlockExpr != null -> inlineBlockExpr.inferType(expected)
+//        }
         return TyNever
     }
 
@@ -1307,7 +1381,7 @@ class TypePsiWalker(
         }
     }
 
-    private fun inferUpdateStmt(updateStmt: MvUpdateSpecStmt) {
+    private fun inferUpdateStmt(updateStmt: MvUpdateStmt) {
         updateStmt.exprList.forEach { it.inferType() }
     }
 

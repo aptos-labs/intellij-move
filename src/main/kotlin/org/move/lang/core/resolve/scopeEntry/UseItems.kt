@@ -6,6 +6,7 @@ import org.move.lang.core.psi.MvUseSpeck
 import org.move.lang.core.psi.MvUseStmt
 import org.move.lang.core.psi.NamedItemScope
 import org.move.lang.core.psi.ext.MvItemsOwner
+import org.move.lang.core.psi.ext.useStmtList
 import org.move.lang.core.resolve.PathKind
 import org.move.lang.core.resolve.pathKind
 import org.move.lang.core.types.ItemFQName

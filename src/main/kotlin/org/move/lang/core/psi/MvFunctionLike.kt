@@ -19,6 +19,8 @@ interface MvFunctionLike: MvNameIdentifierOwner,
                           MvGenericDeclaration,
                           MvDocAndAttributeOwner {
 
+    val codeBlock: MvBlockExpr?
+
     val functionParameterList: MvFunctionParameterList?
 
     val returnType: MvReturnType?
@@ -42,13 +44,13 @@ val MvFunctionLike.acquiredTys: List<Ty>
         return this.acquiresPathTypes.map { it.loweredType(false) }
     }
 
-val MvFunctionLike.anyCodeBlock: AnyCodeBlock?
-    get() = when (this) {
-        is MvFunction -> this.codeBlock
-        is MvSpecFunction -> this.specCodeBlock
-        is MvSpecInlineFunction -> this.specCodeBlock
-        else -> null
-    }
+//val MvFunctionLike.codeBlock: MvBlockExpr?
+//    get() = when (this) {
+//        is MvFunction -> this.codeBlock
+//        is MvSpecFunction -> this.codeBlock
+//        is MvSpecInlineFunction -> this.codeBlock
+//        else -> null
+//    }
 
 val MvFunctionLike.module: MvModule?
     get() =

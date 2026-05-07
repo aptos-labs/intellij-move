@@ -9,6 +9,7 @@ import com.intellij.psi.TokenType.WHITE_SPACE
 import com.intellij.psi.tree.IElementType
 import com.intellij.psi.tree.TokenSet
 import com.intellij.util.BitUtil
+import org.move.lang.MoveParser
 import org.move.lang.MoveParserDefinition.Companion.EOL_COMMENT
 import org.move.lang.MoveParserDefinition.Companion.EOL_DOC_COMMENT
 import org.move.lang.MvElementTypes.*
@@ -185,16 +186,22 @@ object MoveParserUtil: GeneratedParserUtilBase() {
     }
 
     @JvmStatic
-    fun msl(b: PsiBuilder, level: Int, parser: Parser): Boolean {
-        b.mslLevel = b.mslLevel + 1
-        val result = parser.parse(b, level)
-        b.mslLevel = b.mslLevel - 1
-        return result
+    fun mainOnly(b: PsiBuilder, level: Int, parser: Parser): Boolean {
+        if (b.stmtKind != StmtKind.MAIN) return false
+//        if (b.mslLevel == 0) return false
+        return parser.parse(b, level)
     }
 
     @JvmStatic
-    fun mslOnly(b: PsiBuilder, level: Int, parser: Parser): Boolean {
-        if (b.mslLevel == 0) return false
+    fun specOnly(b: PsiBuilder, level: Int, parser: Parser): Boolean {
+        if (b.stmtKind != StmtKind.SPEC) return false
+//        if (b.mslLevel == 0) return false
+        return parser.parse(b, level)
+    }
+
+    @JvmStatic
+    fun proofOnly(b: PsiBuilder, level: Int, parser: Parser): Boolean {
+        if (b.stmtKind != StmtKind.PROOF) return false
         return parser.parse(b, level)
     }
 
@@ -467,7 +474,7 @@ object MoveParserUtil: GeneratedParserUtilBase() {
 
     @JvmStatic
     fun globalKeyword(b: PsiBuilder, level: Int): Boolean =
-        contextualKeyword(b, "global", GLOBAL, { it !in CALL_EXPR_START_TOKENS })
+        contextualKeyword(b, "global", GLOBAL) { it !in CALL_EXPR_START_TOKENS }
 
     private val CALL_EXPR_START_TOKENS = tokenSetOf(L_PAREN, LT)
 
@@ -578,6 +585,26 @@ object MoveParserUtil: GeneratedParserUtilBase() {
     private var PsiBuilder.mslLevel: Int
         get() = getUserData(MSL_LEVEL) ?: 0
         set(value) = putUserData(MSL_LEVEL, value)
+
+    enum class StmtKind {
+        MAIN,
+        SPEC,
+        PROOF;
+    }
+
+    private val STMT_KIND: Key<StmtKind> = Key("MoveParserUtil.STMT_KIND")
+    private var PsiBuilder.stmtKind: StmtKind
+        get() = getUserData(STMT_KIND) ?: StmtKind.MAIN
+        set(value) = putUserData(STMT_KIND, value)
+
+    @JvmStatic
+    fun withStmtKind(b: PsiBuilder, level: Int, stmtKind: StmtKind, parser: Parser): Boolean {
+        val oldStmtKind = b.stmtKind
+        b.stmtKind = stmtKind;
+        val result = parser.parse(b, level)
+        b.stmtKind = oldStmtKind
+        return result
+    }
 
     private fun isContextualKeyword(
         b: PsiBuilder,

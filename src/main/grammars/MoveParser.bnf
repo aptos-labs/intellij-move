@@ -296,7 +296,7 @@ Const ::= Attr* VisibilityModifier? CONST_KW IDENTIFIER TypeAscription Initializ
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 fake SpecFunction ::= Attr* spec native? fun IDENTIFIER? TypeParameterList?
                         FunctionParameterList? ReturnType?
-                        (';' | SpecCodeBlock)?
+                        (';' | BlockExpr)?
 {
     implements = [
         "org.move.lang.core.psi.MvFunctionLike"
@@ -304,6 +304,7 @@ fake SpecFunction ::= Attr* spec native? fun IDENTIFIER? TypeParameterList?
         "org.move.lang.core.types.infer.MvInferenceContextOwner"
         "org.move.lang.core.psi.ScopeMslOnlyElement"
     ]
+    methods = [ codeBlock = "BlockExpr" ]
     mixin = "org.move.lang.core.psi.ext.MvSpecFunctionMixin"
     hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
 }
@@ -311,7 +312,7 @@ private SpecFunctionItem ::= SpecFunctionInner
                             | NativeSpecFunctionInner
 
 SpecFunctionInner ::= Attr* spec fun IDENTIFIER TypeParameterList?
-                       FunctionParameterList ReturnType? (<<msl SpecCodeBlock>> | ';')
+                       FunctionParameterList ReturnType? (<<withStmtKind 'StmtKind.SPEC' BlockExpr>> | ';')
 {
     pin = 3
     elementType = SpecFunction
@@ -327,7 +328,7 @@ NativeSpecFunctionInner ::= Attr* spec (native fun) IDENTIFIER TypeParameterList
 
 fake SpecInlineFunction ::= Attr* native? fun IDENTIFIER? TypeParameterList?
                                 FunctionParameterList? ReturnType?
-                                (SpecCodeBlock | ';')?
+                                (BlockExpr | ';')?
 {
     implements = [
         "org.move.lang.core.psi.MvFunctionLike"
@@ -335,6 +336,7 @@ fake SpecInlineFunction ::= Attr* native? fun IDENTIFIER? TypeParameterList?
         "org.move.lang.core.psi.ext.MvItemElement"
         "org.move.lang.core.psi.ScopeMslOnlyElement"
     ]
+    methods = [ codeBlock = "BlockExpr" ]
     mixin = "org.move.lang.core.psi.ext.MvSpecInlineFunctionMixin"
     hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
 }
@@ -343,7 +345,7 @@ fake SpecInlineFunction ::= Attr* native? fun IDENTIFIER? TypeParameterList?
 //                                    | UninterpretedSpecInlineFunctionInner
 
 SpecInlineFunctionInner ::= Attr* fun IDENTIFIER TypeParameterList?
-                             FunctionParameterList ReturnType? (<<msl SpecCodeBlock>> | ';')
+                             FunctionParameterList ReturnType? (<<withStmtKind 'StmtKind.SPEC' BlockExpr>> | ';')
 {
     pin = 2
     elementType = SpecInlineFunction
@@ -431,7 +433,7 @@ private VariantArgs ::= BlockFields | TupleFields
 fake Function ::= Attr* native? VisibilityModifier? entry? inline?
                     fun? IDENTIFIER? TypeParameterList? FunctionParameterList?
                         ReturnType? AcquiresType?
-                        (';' | CodeBlock)?
+                        (';' | BlockExpr)?
 {
     implements = [
         "org.move.lang.core.psi.MvFunctionLike"
@@ -439,6 +441,7 @@ fake Function ::= Attr* native? VisibilityModifier? entry? inline?
         "org.move.lang.core.types.infer.MvInferenceContextOwner"
         "org.move.lang.core.psi.MvModificationTrackerOwner"
     ]
+    methods = [ codeBlock = "BlockExpr" ]
     mixin = "org.move.lang.core.psi.ext.MvFunctionMixin"
     hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
 }
@@ -447,7 +450,7 @@ private FunctionInnerVisFirst ::= FunctionModifierSetInner? fun
 private FunctionInnerNoVisFirst ::= fun
 private FunctionInnerFirst ::= FunctionInnerVisFirst
 
-FunctionInner ::= Attr* FunctionModifiers? fun FunctionSignatureInner (CodeBlock | ';')
+FunctionInner ::= Attr* FunctionModifiers? fun FunctionSignatureInner (BlockExpr | ';')
 {
     pin = "fun"
     elementType = Function
@@ -513,22 +516,6 @@ private ReturnTypeItem_with_recover ::= Type
 }
 private ReturnTypeItem_recover ::= !( '{' | ';' | acquires | reads | writes | pure | '!' )
 
-ResourceAccessItemList ::= <<isResourceAccessEnabled>> ResourceAccessItem*
-ResourceAccessItem ::= pure | (('!')? (acquires | reads | writes) AccessSpecifierList)
-
-AccessSpecifierList ::= <<comma_separated_list AccessSpecifier>>
-AccessSpecifier ::= <<pathMode 'WILDCARD' PathImpl>> AddressSpecifier?
-
-AddressSpecifier ::= '(' AddressSpecifierArg ')' { pin = 1 }
-AddressSpecifierArg ::= '*'
-                        | AddressSpecifierLit
-                        | <<pathMode 'VALUE' (PathImpl '(' AddressSpecifierCallParam ')')>>
-                        | IDENTIFIER
-AddressSpecifierLit ::= DIEM_ADDRESS | INTEGER_LITERAL
-
-AddressSpecifierCallParam ::= AddressSpecifierCallParamImpl
-AddressSpecifierCallParamImpl ::= PathIdent { elementType = Path }
-
 // acquires T, Record
 AcquiresType ::= acquires AcquiresType_items { pin = 1 }
 private AcquiresType_items ::= <<comma_separated_list PathType>>
@@ -592,7 +579,7 @@ FriendDecl ::= Attr* (friend !fun) PathImpl ';'
 
 UseStmt ::= Attr* use UseSpeck ';' {
     pin = "use"
-    extends = Stmt
+//    extends = Stmt
     implements = [ "org.move.lang.core.psi.ext.MvDocAndAttributeOwner" ]
 }
 UseSpeck ::= PathImpl ( UseAlias | ('::' UseGroup) )?
@@ -780,11 +767,46 @@ private Pat_first ::= '_' | '..' | '(' | Path_first | AnyLitToken_first
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Stmts
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-Stmt ::= LetMoveStmt | ExprStmt
+BlockExpr ::= '{' Block_stmts '}'
+{
+    pin = 1
+    implements = [
+        "org.move.lang.core.psi.ext.MvItemsOwner"
+        "org.move.lang.core.psi.AnyCodeBlock"
+    ]
+}
+private Block_stmts ::= Stmt*
+{
+    recoverWhile = "Block_stmts_recover"
+}
+private Block_stmts_recover ::= !('}' | <<eof>>)
+
+Stmt ::= (<<mainOnly UseStmt>> | <<specOnly UseStmt>>)
+             | LetStmt
+             | <<specOnly Block_specOnly_items>>
+             | <<proofOnly Block_proofOnly_items>>
+//             | <<mainOnly InlineSpecBlockStmt>>
+             | ExprStmt
+//{
+//    recoverWhile = "Stmt_items_recover"
+//}
+
+private Block_specOnly_items ::= SpecInlineFunctionStmt
+                                | Lemma
+                                | PragmaStmt
+                                | UpdateStmt
+                                | GlobalVariableStmt
+                                | IncludeStmt
+                                | ApplySchemaStmt
+                                | SchemaFieldStmt_impl
+                                | SpecPredicateStmt_items
+
+private Block_proofOnly_items ::= ApplyLemmaStmt
+                                | SpecPredicateStmt_items
 
 SpecExprStmt ::= (SpecExpr_item !'}') ';' { pin = 1 }
-private SpecExpr ::= SpecExprStmt_items | Expr
-private SpecExpr_item ::= SpecExprStmt_items | ExprStmt_expr
+private SpecExpr ::= SpecPredicateStmt_items | Expr
+private SpecExpr_item ::= SpecPredicateStmt_items | ExprStmt_expr
 {
     recoverWhile = SpecExprStmt_recover
 }
@@ -793,35 +815,64 @@ private SpecExprStmt_first ::= let | if | while
                                     | include | apply | pragma | emits | assume | assert | ensures
                                     | axiom | modifies | aborts_if | aborts_with | requires | invariant
 
-private SpecExprStmt_items ::= AssumeSpecExpr | AssertSpecExpr | AbortsIfSpecExpr | AbortsWithSpecExpr
-                | RequiresSpecExpr | DecreasesSpecExpr
-                | EnsuresSpecExpr | ModifiesSpecExpr | InvariantSpecExpr | AxiomSpecExpr
-                | EmitsSpecExpr
+private SpecPredicateStmt_items ::= ConditionPredicateStmt
+                                    | AbortsIfStmt | AbortsWithStmt
+                                    /*AssumeSpecExpr | AssertSpecExpr |*/
+                                    /*| RequiresSpecExpr | DecreasesSpecExpr*/
+                                    /*| EnsuresSpecExpr | ModifiesSpecExpr*/
+                                    | InvariantStmt | AxiomStmt | EmitsStmt
 
+ConditionPredicateStmt ::= (assume | assert | requires | ensures | decreases | modifies)
+                            SpecPropertyList?
+                            Expr ';'?
+{
+    pin = 1
+    implements = [
+        "org.move.lang.core.psi.MslOnlyElement"
+    ]
+}
+
+LetStmt ::= let <<specOnly post>>? Pat TypeAscription? Initializer? ';'
+{
+    pin = 1
+    implements = [
+        "org.move.lang.core.psi.ext.MvTypeAscriptionOwner"
+    ]
+}
 private post ::= <<postKeyword>>
-fake LetStmt ::= let post? Pat? TypeAscription? Initializer? ';'?
-{
-    implements = [ "org.move.lang.core.psi.ext.MvTypeAscriptionOwner" ]
-}
+//
+//LetMoveStmt ::= let Pat TypeAscription? Initializer? ';'
+//{
+//    pin = 1
+//    elementType = LetStmt
+//}
+//LetMslStmt ::= (let post?) Pat TypeAscription? Initializer? ';'
+//{
+//    pin = 1
+//    elementType = LetStmt
+//}
 
-LetMoveStmt ::= let Pat TypeAscription? Initializer? ';'
+ExprStmt ::= Expr_impl ';'?
+private Expr_impl ::= Expr
 {
-    pin = 1
-    elementType = LetStmt
+    recoverWhile = Expr_impl_recover
 }
-LetMslStmt ::= (let post?) Pat TypeAscription? Initializer? ';'
-{
-    pin = 1
-    elementType = LetStmt
-}
-
-ExprStmt ::= (ExprStmt_expr !('}')) ';' { pin = 1 }
+//private Expr_impl_recover ::= !(';' | '}')
+//{
+//    pin = 1
+//}
 private ExprStmt_expr ::= Expr
 //private ExprStmt_expr ::= ItemSpecBlockExpr | Expr
 {
-    recoverWhile = "ExprStmt_recover"
+//    recoverWhile = "ExprStmt_recover"
 }
-private ExprStmt_recover ::= !(';' | '}' | <<mslOnly SpecExpr_first>> | Expr_first)
+private Expr_impl_recover ::= !(
+                                    ';' | '}'
+                                    | Expr_first
+                                    | <<specOnly SpecExpr_first>>
+                                    | <<proofOnly ProofExpr_first>>
+                                )
+
 private Expr_first ::= let | if | while | loop | continue | break | return | spec
                         | copy | move | abort
 //                        | (<<VECTOR_IDENTIFIER>> ('<' | '['))
@@ -829,17 +880,21 @@ private Expr_first ::= let | if | while | loop | continue | break | return | spe
                         | '*' | '&' | '!' | '|' | '{' | '('
                         | AnyLitToken_first
                         | (AddressRef '::')
-private SpecExpr_first ::= include | apply | pragma | emits | assume | assert | ensures
-                            | axiom | modifies | aborts_if | aborts_with | requires
-                            | invariant | choose | decreases | update
+private SpecExpr_first ::= include | apply | pragma | emits
+                            | axiom | aborts_if | aborts_with
+                            | invariant | choose | update
+                            | ConditionPredicate_first
+private ProofExpr_first ::= apply | forall | ConditionPredicate_first
+
+private ConditionPredicate_first ::= assume | assert | requires | ensures | decreases | modifies
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Blocks
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-private AnyBlockImpl ::= CodeBlock | InlineBlock
 
-InlineBlock ::= Expr
+// BlockExpr is part of Expr
 
+SpecBlockExpr ::= CodeBlock
 CodeBlockExpr ::= CodeBlock
 CodeBlock ::= '{' CodeBlock_items '}'
 {
@@ -848,7 +903,7 @@ CodeBlock ::= '{' CodeBlock_items '}'
         "org.move.lang.core.psi.ext.MvItemsOwner"
         "org.move.lang.core.psi.AnyCodeBlock"
     ]
-    mixin = "org.move.lang.core.psi.ext.MvCodeBlockMixin"
+//    mixin = "org.move.lang.core.psi.ext.MvCodeBlockMixin"
 }
 
 private CodeBlock_items ::= UseStmt*
@@ -928,8 +983,10 @@ private AtomExpr ::= AnnotatedExpr
                     | AssertMacroExpr
                     | LambdaExpr
                     | LitExpr
-                    | SpecBlockExpr
-                    | CodeBlockExpr
+                    | InlineSpecBlockExpr
+                    | BlockExpr
+//                    | SpecBlockExpr
+//                    | CodeBlockExpr
 
 
 private CastLikeExpr_items ::= CastExpr | UnitExpr | IsExpr
@@ -1000,8 +1057,8 @@ private ImplyBinExpr_items ::= ImplyBinExpr | PartialImplyBinExpr
 ImplyBinExpr ::= Expr ImplyBinOp Expr
 PartialImplyBinExpr ::= Expr PartialImplyBinOp Expr
 
-ImplyBinOp ::= <<includeStmtModeFalse>> <<mslOnly eqeq_gt>>
-PartialImplyBinOp ::= <<mslOnly lt_eqeq_gt>>
+ImplyBinOp ::= <<includeStmtModeFalse>> <<specOnly eqeq_gt>>
+PartialImplyBinOp ::= <<specOnly lt_eqeq_gt>>
 
 BangExpr ::= '!' Expr
 DerefExpr ::= '*' Expr
@@ -1071,7 +1128,7 @@ upper TupleLitExprUpper ::= ',' [ Expr (',' Expr)* ','? ] ')' {
     elementType = TupleLitExpr
 }
 
-LambdaExpr ::= LambdaParameterList Expr? SpecBlockExpr?
+LambdaExpr ::= LambdaParameterList Expr? InlineSpecBlock?
 {
     pin = 1
 }
@@ -1110,16 +1167,16 @@ CallExpr ::= Expr !'!' ValueArgumentList {
 //        "org.move.lang.core.resolve.ref.InferenceCachedPathElement"
     ]
 }
-ValueArgumentList ::= '(' ValueArgumentList_items? ')' {
+ValueArgumentList ::= '(' <<comma_separated_list ValueArgument>>? ')' {
     pin = 1
 }
-private ValueArgumentList_items ::= ValueArgument (',' ValueArgument)* ','?
+//private ValueArgumentList_items ::= ValueArgument (',' ValueArgument)* ','?
 
 ValueArgument ::= !')' Expr &(',' | ')') {
     pin = 1
     recoverWhile = ValueArgument_recover
 }
-private ValueArgument_recover ::= !(<<mslOnly SpecExpr_first>> | Expr_first | ')' | '}' | ';' | ',')
+private ValueArgument_recover ::= !(<<specOnly SpecExpr_first>> | Expr_first | ')' | '}' | ';' | ',')
 
 MatchExpr ::= Attr* <<remapContextualKwOnRollback (match MatchArgument MatchBody)>>
 {
@@ -1142,34 +1199,49 @@ private MatchArm_with_recover ::= !'}' MatchArm
 }
 private MatchArm_recover ::= !(Pat_first | Attr_first | '}')
 
-IfExpr ::= if Condition AnyBlockImpl ElseBlock? { pin = 1 }
+IfExpr ::= if Condition Expr ElseBlock?
+{
+    pin = 1
+    methods = [ bodyExpr = "Expr" ]
+}
 
 Condition ::= '(' ConditionBody ')' { pin = 1 }
 private ConditionBody ::= Expr { recoverWhile = "ConditionBody_recover" }
 private ConditionBody_recover ::= !')'
 
-ElseBlock ::= else AnyBlockImpl { pin = 1 }
+ElseBlock ::= else Expr
+{
+    pin = 1
+    methods = [ bodyExpr = "Expr" ]
+}
 
-LoopExpr ::= LabelDecl? loop AnyBlockImpl {
+LoopExpr ::= LabelDecl? loop Expr {
     pin = 2
+    methods = [ bodyExpr = "Expr" ]
     implements = [
         "org.move.lang.core.psi.ext.label.MvLabeledExpression"
         "org.move.lang.core.psi.MvLoopLike"
     ]
 }
-WhileExpr ::= LabelDecl? while Condition AnyBlockImpl SpecBlockExpr? {
+WhileExpr ::= LabelDecl? while Condition Expr InlineSpecBlock? {
     pin = 2
     implements = [
         "org.move.lang.core.psi.ext.label.MvLabeledExpression"
         "org.move.lang.core.psi.MvLoopLike"
     ]
+    methods = [ bodyExpr = "Expr" ]
 }
-ForExpr ::= for ForIterCondition AnyBlockImpl {
+ForExpr ::= for ForIterCondition Expr {
     pin = 1
-    implements = [ "org.move.lang.core.psi.MvLoopLike" ]
+    implements = [
+        "org.move.lang.core.psi.MvLoopLike"
+    ]
+    methods = [ bodyExpr = "Expr" ]
 }
-ForIterCondition ::= '(' PatBinding in Expr SpecBlockExpr? ')' {
+ForIterCondition ::= '(' PatBinding in Expr InlineSpecBlock? ')'
+{
     pin = 1
+    methods = [ rangeExpr = "Expr" ]
 }
 
 LabelDecl ::= QUOTE_IDENTIFIER ':'
@@ -1357,7 +1429,7 @@ private ModuleSpecBlock_item_with_recover ::= !('}' | <<eof>>) ModuleSpecBlock_i
 private ModuleSpecBlock_item ::= UseStmt | SpecFunctionItem | Schema | ModuleItemSpec | ItemSpec
 private ModuleSpecBlock_item_recover ::= !('}' | <<eof>> | spec | use)
 
-ModuleItemSpec ::= spec MODULE_KW <<msl SpecCodeBlock>>
+ModuleItemSpec ::= spec MODULE_KW <<withStmtKind 'StmtKind.SPEC' BlockExpr>>
 {
     pin = 2
     implements = [
@@ -1365,7 +1437,7 @@ ModuleItemSpec ::= spec MODULE_KW <<msl SpecCodeBlock>>
         "org.move.lang.core.psi.ScopeMslOnlyElement"
     ]
 }
-ItemSpec ::= (spec !MODULE_KW) ItemSpecRef ItemSpecSignature? <<msl SpecCodeBlock>> Proof?
+ItemSpec ::= (spec !MODULE_KW) ItemSpecRef ItemSpecSignature? <<withStmtKind 'StmtKind.SPEC' BlockExpr>> Proof?
 {
     pin = 1
     implements = [
@@ -1423,7 +1495,7 @@ ItemSpecRef ::= IDENTIFIER
     mixin = "org.move.lang.core.psi.ext.MvItemSpecRefMixin"
 }
 
-Schema ::= Attr* (spec schema) IDENTIFIER TypeParameterList? <<msl SpecCodeBlock>> {
+Schema ::= Attr* (spec schema) IDENTIFIER TypeParameterList? <<withStmtKind 'StmtKind.SPEC' BlockExpr>> {
     pin = 2
     implements = [
         "org.move.lang.core.psi.MvGenericDeclaration"
@@ -1435,12 +1507,14 @@ Schema ::= Attr* (spec schema) IDENTIFIER TypeParameterList? <<msl SpecCodeBlock
     hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
 }
 
-//SpecBlock ::= spec <<msl SpecCodeBlock>> {
-//    implements = [
-//        "org.move.lang.core.psi.ScopeMslOnlyElement"
-//    ]
-//}
-SpecBlockExpr ::= spec <<msl SpecCodeBlock>> {
+InlineSpecBlockStmt ::= InlineSpecBlock ';'?
+InlineSpecBlockExpr ::= InlineSpecBlock
+InlineSpecBlock ::= spec <<withStmtKind 'StmtKind.SPEC' BlockExpr>> {
+    implements = [
+        "org.move.lang.core.psi.ScopeMslOnlyElement"
+    ]
+}
+InlineBlock ::= spec <<withStmtKind 'StmtKind.SPEC' BlockExpr>> {
     implements = [
         "org.move.lang.core.psi.ScopeMslOnlyElement"
     ]
@@ -1454,24 +1528,28 @@ SpecCodeBlock ::= '{' ItemSpecBlock_items '}'
         "org.move.lang.core.psi.AnyCodeBlock"
         "org.move.lang.core.psi.MslOnlyElement"
     ]
-    mixin = "org.move.lang.core.psi.ext.MvSpecCodeBlockMixin"
+//    mixin = "org.move.lang.core.psi.ext.MvSpecCodeBlockMixin"
 }
-private ItemSpecBlock_items ::= (Lemma | SpecStmt | ExprStmt)* (SpecExprStmt_items | ExprStmt_expr)?
+private ItemSpecBlock_items ::= (Lemma | SpecStmt | ExprStmt)* (SpecPredicateStmt_items | ExprStmt_expr)?
 {
     recoverWhile = ItemSpecBlock_items_recover
 }
 private ItemSpecBlock_items_recover ::= !('}' | <<eof>>)
 
 private SpecStmt ::= UseStmt
-                       | SchemaFieldStmtImpl
+                       | SchemaFieldStmt_impl
                        | GlobalVariableStmt
                        | SpecInlineFunctionStmt
-                       | PragmaSpecStmt
+                       | PragmaStmt
                        | IncludeStmt
-                       | UpdateSpecStmt
+                       | UpdateStmt
                        | ApplySchemaStmt
-                       | LetMslStmt
+                       | LetStmt
                        | SpecExprStmt
+
+private ProofStmt ::= LetStmt
+                      | ApplyLemmaStmt
+                      | SpecPredicateStmt_items
 
 fake SchemaFieldStmt ::= local? PatBinding TypeAscription ';'
 {
@@ -1481,7 +1559,7 @@ fake SchemaFieldStmt ::= local? PatBinding TypeAscription ';'
     ]
 }
 
-private SchemaFieldStmtImpl ::= SchemaFieldStmt_local | SchemaFieldStmt_simple
+private SchemaFieldStmt_impl ::= SchemaFieldStmt_local | SchemaFieldStmt_simple
 
 SchemaFieldStmt_simple ::= PatBinding TypeAscription ';' {
     pin = 2
@@ -1504,6 +1582,10 @@ GlobalVariableStmt ::= Attr* global IDENTIFIER TypeParameterList? TypeAscription
     mixin = "org.move.lang.core.psi.ext.MvGlobalVariableMixin"
 }
 
+PragmaStmt ::= pragma <<comma_separated_list PragmaAttribute>> ';' {
+    pin = 1
+    implements = [ "org.move.lang.core.psi.MslOnlyElement" ]
+}
 PragmaSpecStmt ::= pragma <<comma_separated_list PragmaAttribute>> ';' {
     pin = 1
     implements = [ "org.move.lang.core.psi.MslOnlyElement" ]
@@ -1512,64 +1594,75 @@ PragmaAttribute ::= IDENTIFIER ('=' Expr)? {
     implements = [ "org.move.lang.core.psi.MslOnlyElement" ]
 }
 
-AbortsIfSpecExpr ::= aborts_if SpecPropertyList? Expr AbortsIfWith? {
+AbortsIfStmt ::= aborts_if SpecPropertyList? Expr AbortsIfWith? ';'? {
     pin = 1
     implements = [
-        "org.move.lang.core.psi.MvBoolSpecExpr"
+//        "org.move.lang.core.psi.MvBoolSpecExpr"
         "org.move.lang.core.psi.MslOnlyElement"
     ]
 }
+//AbortsIfSpecExpr ::= aborts_if SpecPropertyList? Expr AbortsIfWith? {
+//    pin = 1
+//    implements = [
+//        "org.move.lang.core.psi.MvBoolSpecExpr"
+//        "org.move.lang.core.psi.MslOnlyElement"
+//    ]
+//}
 AbortsIfWith ::= with Expr {
     pin = 1
     implements = [ "org.move.lang.core.psi.MslOnlyElement" ]
 }
 
-AbortsWithSpecExpr ::= aborts_with SpecPropertyList? <<comma_separated_list Expr>> {
+AbortsWithStmt ::= aborts_with SpecPropertyList? <<comma_separated_list Expr>> ';'? {
     pin = 1
     implements = [ "org.move.lang.core.psi.MslOnlyElement" ]
 }
+//AbortsWithSpecExpr ::= aborts_with SpecPropertyList? <<comma_separated_list Expr>> {
+//    pin = 1
+//    implements = [ "org.move.lang.core.psi.MslOnlyElement" ]
+//}
 
-AssertSpecExpr ::= assert SpecPropertyList? Expr {
-    pin = 1
-    implements = [
-        "org.move.lang.core.psi.MvBoolSpecExpr"
-        "org.move.lang.core.psi.MslOnlyElement"
-    ]
-}
-AssumeSpecExpr ::= assume SpecPropertyList? Expr {
-    pin = 1
-    implements = [
-        "org.move.lang.core.psi.MvBoolSpecExpr"
-        "org.move.lang.core.psi.MslOnlyElement"
-    ]
-}
-EnsuresSpecExpr ::= ensures SpecPropertyList? SpecExpr {
-    pin = 1
-    implements = [
-        "org.move.lang.core.psi.MvBoolSpecExpr"
-        "org.move.lang.core.psi.MslOnlyElement"
-    ]
-}
-RequiresSpecExpr ::= requires SpecPropertyList? Expr {
-    pin = 1
-    implements = [
-        "org.move.lang.core.psi.MvBoolSpecExpr"
-        "org.move.lang.core.psi.MslOnlyElement"
-    ]
-}
-DecreasesSpecExpr ::= decreases SpecPropertyList? Expr {
-    pin = 1
-    implements = [
-        "org.move.lang.core.psi.MslOnlyElement"
-    ]
-}
+//AssertSpecExpr ::= assert SpecPropertyList? Expr {
+//    pin = 1
+//    implements = [
+//        "org.move.lang.core.psi.MvBoolSpecExpr"
+//        "org.move.lang.core.psi.MslOnlyElement"
+//    ]
+//}
+//AssumeSpecExpr ::= assume SpecPropertyList? Expr {
+//    pin = 1
+//    implements = [
+//        "org.move.lang.core.psi.MvBoolSpecExpr"
+//        "org.move.lang.core.psi.MslOnlyElement"
+//    ]
+//}
+//EnsuresSpecExpr ::= ensures SpecPropertyList? SpecExpr {
+//    pin = 1
+//    implements = [
+//        "org.move.lang.core.psi.MvBoolSpecExpr"
+//        "org.move.lang.core.psi.MslOnlyElement"
+//    ]
+//}
+//RequiresSpecExpr ::= requires SpecPropertyList? Expr {
+//    pin = 1
+//    implements = [
+//        "org.move.lang.core.psi.MvBoolSpecExpr"
+//        "org.move.lang.core.psi.MslOnlyElement"
+//    ]
+//}
+//DecreasesSpecExpr ::= decreases SpecPropertyList? Expr {
+//    pin = 1
+//    implements = [
+//        "org.move.lang.core.psi.MslOnlyElement"
+//    ]
+//}
 
-ModifiesSpecExpr ::= modifies SpecPropertyList? Expr {
-    pin = 1
-    implements = [
-        "org.move.lang.core.psi.MslOnlyElement"
-    ]
-}
+//ModifiesSpecExpr ::= modifies SpecPropertyList? Expr {
+//    pin = 1
+//    implements = [
+//        "org.move.lang.core.psi.MslOnlyElement"
+//    ]
+//}
 
 IncludeStmt ::= include SpecPropertyList? IncludeItem ';' {
     pin = 1
@@ -1578,6 +1671,12 @@ IncludeStmt ::= include SpecPropertyList? IncludeItem ';' {
     ]
 }
 
+UpdateStmt ::= update UpdateExpr_items '=' Expr ';' {
+    pin = 1
+    implements = [
+        "org.move.lang.core.psi.MslOnlyElement"
+    ]
+}
 UpdateSpecStmt ::= update UpdateExpr_items '=' Expr ';' {
     pin = 1
     implements = [
@@ -1645,18 +1744,18 @@ FunctionPattern ::= PatternVis? PatternIdent TypeParameterList? {
     ]
 }
 
-InvariantSpecExpr ::= invariant TypeParameterList? update? SpecPropertyList? Expr {
+InvariantStmt ::= invariant TypeParameterList? update? SpecPropertyList? Expr ';'? {
     pin = 1
     implements = [
-        "org.move.lang.core.psi.MvBoolSpecExpr"
+//        "org.move.lang.core.psi.MvBoolSpecExpr"
         "org.move.lang.core.psi.MslOnlyElement"
     ]
 }
 
-AxiomSpecExpr ::= axiom TypeParameterList? SpecPropertyList? Expr {
+AxiomStmt ::= axiom TypeParameterList? SpecPropertyList? Expr ';'? {
     pin = 1
     implements = [
-        "org.move.lang.core.psi.MvBoolSpecExpr"
+//        "org.move.lang.core.psi.MvBoolSpecExpr"
         "org.move.lang.core.psi.MvGenericDeclaration"
         "org.move.lang.core.psi.MslOnlyElement"
     ]
@@ -1676,7 +1775,7 @@ SpecProperty ::= !']' IDENTIFIER ('=' LitExpr)? &(',' | ']') {
     ]
 }
 
-EmitsSpecExpr ::= emits SpecPropertyList? Expr to Expr EmitsCondition? {
+EmitsStmt ::= emits SpecPropertyList? Expr to Expr EmitsCondition? ';'? {
     pin = 1
     implements = [ "org.move.lang.core.psi.MslOnlyElement" ]
 }
@@ -1713,7 +1812,7 @@ QuantWhere ::= where Expr
     implements = [ "org.move.lang.core.psi.MslOnlyElement" ]
 }
 
-ForallQuantExpr ::= <<mslOnly forall>> QuantBindings QuantWhere? ':' Expr
+ForallQuantExpr ::= <<specOnly forall>> QuantBindings QuantTriggerList? QuantWhere? ':' Expr
 {
     pin = 1
     rightAssociative = true
@@ -1722,7 +1821,7 @@ ForallQuantExpr ::= <<mslOnly forall>> QuantBindings QuantWhere? ':' Expr
         "org.move.lang.core.psi.MslOnlyElement"
     ]
 }
-ExistsQuantExpr ::= <<mslOnly exists>> QuantBindings QuantWhere? ':' Expr
+ExistsQuantExpr ::= <<specOnly exists>> QuantBindings QuantTriggerList? QuantWhere? ':' Expr
 {
     pin = 1
     rightAssociative = true
@@ -1732,9 +1831,10 @@ ExistsQuantExpr ::= <<mslOnly exists>> QuantBindings QuantWhere? ':' Expr
     ]
 }
 QuantBindings ::= <<comma_separated_list QuantBinding>>
+QuantTriggerList ::= '{' <<comma_separated_list Expr>> '}'
 
 // TODO: should be single QuantBinding, multiple are not allowed
-ChooseQuantExpr ::= choose min? QuantBindings QuantWhere?
+ChooseQuantExpr ::= <<specOnly choose>> min? QuantBindings QuantWhere?
 {
     pin = 1
     implements = [
@@ -1756,14 +1856,26 @@ TypeQuantBinding ::= PatBinding TypeAscription {
     extends = QuantBinding
 }
 
-Proof ::= proof <<msl SpecCodeBlock>>
+Proof ::= proof <<withStmtKind 'StmtKind.PROOF' BlockExpr>>
 {
     pin = 1
 }
-Lemma ::= lemma IDENTIFIER TypeParameterList? FunctionParameterList <<msl SpecCodeBlock>> Proof?
+Lemma ::= lemma IDENTIFIER
+            TypeParameterList? FunctionParameterList <<withStmtKind 'StmtKind.SPEC' BlockExpr>>
+{
+    pin = 1
+    extends = Stmt
+}
+
+ApplyLemmaStmt ::= ForallQuantApply? apply PathImpl ValueArgumentList ';'
+{
+    pin = "apply"
+}
+ForallQuantApply ::= forall QuantBindings QuantTriggerList?
 {
     pin = 1
 }
+ApplyLemma ::= apply PathImpl ValueArgumentList ';'
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Meta rules
@@ -1783,4 +1895,7 @@ private lt_eqeq_gt ::= <<lteqeqgtImpl>>
 private dotdot ::= <<dotdotImpl>>
 
 private meta comma_separated_list ::= <<param>> ( ',' <<param>> )* ','?
-private meta list_element ::= !'>' <<param>> (',' | &'>') { pin = 2 }
+private meta comma_separated_list_recover_at ::= <<item>> ( ',' <<item>> )* ','?
+{
+    recoverWhile = "<<recovery>>"
+}

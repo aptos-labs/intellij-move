@@ -29,8 +29,8 @@ val MvSpecFunction.parentModule: MvModule?
 val MvSpecInlineFunction.parentModule: MvModule?
     get() {
         val functionStmt = this.parent as MvSpecInlineFunctionStmt
-        val specCodeBlock = functionStmt.parent as MvSpecCodeBlock
-        val moduleSpec = specCodeBlock.parent as? MvModuleItemSpec ?: return null
+        val codeBlock = functionStmt.parent as MvBlockExpr
+        val moduleSpec = codeBlock.parent as? MvModuleItemSpec ?: return null
         return moduleSpec.definitionModule
     }
 

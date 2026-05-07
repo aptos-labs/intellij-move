@@ -40,7 +40,7 @@ sealed class MvContextType(presentableName: String): TemplateContextType(present
     }
 
     class Block: MvContextType("Code block") {
-        override fun isInContext(element: PsiElement): Boolean = owner(element) is MvCodeBlock
+        override fun isInContext(element: PsiElement): Boolean = owner(element) is MvBlockExpr
     }
 
     class Type: MvContextType("Type") {
@@ -49,7 +49,7 @@ sealed class MvContextType(presentableName: String): TemplateContextType(present
 
     companion object {
         private fun owner(element: PsiElement): PsiElement? = PsiTreeUtil.findFirstParent(element) {
-            it is MvCodeBlock
+            it is MvBlockExpr
                     || it is MvModule
                     || it is PsiFile
                     || it is MvType
