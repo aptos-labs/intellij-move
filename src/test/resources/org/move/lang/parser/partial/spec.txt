@@ -19,7 +19,7 @@ FILE
       PsiWhiteSpace(' ')
       MvItemSpecRefImpl(ITEM_SPEC_REF)
         PsiElement(IDENTIFIER)('my_function')
-      PsiErrorElement:<function signature> or '{' expected, got 'spec'
+      PsiErrorElement:<function signature> expected, got 'spec'
         <empty list>
     PsiWhiteSpace('\n    ')
     MvItemSpecImpl(ITEM_SPEC)
@@ -27,15 +27,13 @@ FILE
       PsiWhiteSpace(' ')
       MvItemSpecRefImpl(ITEM_SPEC_REF)
         PsiElement(IDENTIFIER)('MyStruct')
-      PsiErrorElement:<function signature> or '{' expected, got 'spec'
+      PsiErrorElement:<function signature> expected, got 'spec'
         <empty list>
     PsiWhiteSpace('\n    ')
     MvModuleItemSpecImpl(MODULE_ITEM_SPEC)
       PsiElement(spec)('spec')
       PsiWhiteSpace(' ')
       PsiElement(module)('module')
-      PsiErrorElement:'{' expected, got 'spec'
-        <empty list>
     PsiWhiteSpace('\n    ')
     MvSpecFunctionImpl(SPEC_FUNCTION)
       PsiElement(spec)('spec')
@@ -66,7 +64,7 @@ FILE
       PsiElement(schema_kw)('schema')
       PsiWhiteSpace(' ')
       PsiElement(IDENTIFIER)('MySchema')
-      PsiErrorElement:<type parameters> or '{' expected, got 'fun'
+      PsiErrorElement:<type parameters> expected, got 'fun'
         <empty list>
     PsiWhiteSpace('\n\n    ')
     MvFunctionImpl(FUNCTION)
@@ -77,7 +75,7 @@ FILE
         PsiElement(()('(')
         PsiElement())(')')
       PsiWhiteSpace(' ')
-      MvCodeBlockImpl(CODE_BLOCK)
+      MvBlockExprImpl(BLOCK_EXPR)
         PsiElement({)('{')
         PsiWhiteSpace('\n        ')
         MvExprStmtImpl(EXPR_STMT)
@@ -120,7 +118,7 @@ FILE
       PsiWhiteSpace(' ')
       PsiElement(module)('module')
       PsiWhiteSpace(' ')
-      MvSpecCodeBlockImpl(SPEC_CODE_BLOCK)
+      MvBlockExprImpl(BLOCK_EXPR)
         PsiElement({)('{')
         PsiWhiteSpace('\n        ')
         MvIncludeStmtImpl(INCLUDE_STMT)
@@ -133,50 +131,46 @@ FILE
           PsiErrorElement:'::', ';', <type arguments>, '{' or '}' expected, got 'assert'
             <empty list>
         PsiWhiteSpace('\n\n        ')
-        MvSpecExprStmtImpl(SPEC_EXPR_STMT)
-          MvAssertSpecExprImpl(ASSERT_SPEC_EXPR)
-            PsiElement(assert_kw)('assert')
-            PsiErrorElement:<expression> or '[' expected, got ';'
-              <empty list>
+        MvConditionPredicateStmtImpl(CONDITION_PREDICATE_STMT)
+          PsiElement(assert_kw)('assert')
+          PsiErrorElement:<expression> or '[' expected, got ';'
+            <empty list>
           PsiElement(;)(';')
         PsiWhiteSpace('\n        ')
-        MvSpecExprStmtImpl(SPEC_EXPR_STMT)
-          MvAssumeSpecExprImpl(ASSUME_SPEC_EXPR)
-            PsiElement(assume_kw)('assume')
-            PsiErrorElement:':', <expression> or '[' expected, got ';'
-              <empty list>
+        MvConditionPredicateStmtImpl(CONDITION_PREDICATE_STMT)
+          PsiElement(assume_kw)('assume')
+          PsiErrorElement:':', <expression> or '[' expected, got ';'
+            <empty list>
           PsiElement(;)(';')
         PsiWhiteSpace('\n        ')
-        MvSpecExprStmtImpl(SPEC_EXPR_STMT)
-          MvAssumeSpecExprImpl(ASSUME_SPEC_EXPR)
-            PsiElement(assume_kw)('assume')
+        MvConditionPredicateStmtImpl(CONDITION_PREDICATE_STMT)
+          PsiElement(assume_kw)('assume')
+          PsiWhiteSpace(' ')
+          MvExistsQuantExprImpl(EXISTS_QUANT_EXPR)
+            PsiElement(exists_kw)('exists')
+            PsiErrorElement:IDENTIFIER expected, got '1'
+              <empty list>
             PsiWhiteSpace(' ')
-            MvExistsQuantExprImpl(EXISTS_QUANT_EXPR)
-              PsiElement(exists_kw)('exists')
-              PsiErrorElement:IDENTIFIER expected, got '1'
-                <empty list>
-              PsiWhiteSpace(' ')
-              MvLitExprImpl(LIT_EXPR)
-                PsiElement(INTEGER_LITERAL)('1')
+            MvLitExprImpl(LIT_EXPR)
+              PsiElement(INTEGER_LITERAL)('1')
           PsiElement(;)(';')
         PsiWhiteSpace('\n\n        ')
-        MvSpecExprStmtImpl(SPEC_EXPR_STMT)
-          MvEnsuresSpecExprImpl(ENSURES_SPEC_EXPR)
-            PsiElement(ensures_kw)('ensures')
+        MvConditionPredicateStmtImpl(CONDITION_PREDICATE_STMT)
+          PsiElement(ensures_kw)('ensures')
+          PsiWhiteSpace(' ')
+          MvBinaryExprImpl(BINARY_EXPR[==>])
+            MvPathExprImpl(PATH_EXPR)
+              MvPathImpl(PATH)
+                PsiElement(IDENTIFIER)('result')
             PsiWhiteSpace(' ')
-            MvBinaryExprImpl(BINARY_EXPR[==>])
-              MvPathExprImpl(PATH_EXPR)
-                MvPathImpl(PATH)
-                  PsiElement(IDENTIFIER)('result')
-              PsiWhiteSpace(' ')
-              MvBinaryOpImpl(BINARY_OP)
-                PsiElement(==>)('==>')
-              PsiWhiteSpace(' ')
-              MvLitExprImpl(LIT_EXPR)
-                PsiElement(INTEGER_LITERAL)('1')
+            MvBinaryOpImpl(BINARY_OP)
+              PsiElement(==>)('==>')
+            PsiWhiteSpace(' ')
+            MvLitExprImpl(LIT_EXPR)
+              PsiElement(INTEGER_LITERAL)('1')
           PsiElement(;)(';')
         PsiWhiteSpace('\n        ')
-        MvEnsuresSpecExprImpl(ENSURES_SPEC_EXPR)
+        MvConditionPredicateStmtImpl(CONDITION_PREDICATE_STMT)
           PsiElement(ensures_kw)('ensures')
           PsiWhiteSpace(' ')
           MvLitExprImpl(LIT_EXPR)
