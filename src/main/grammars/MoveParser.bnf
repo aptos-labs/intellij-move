@@ -279,6 +279,7 @@ private ModuleItem ::= UseStmt
                         | Schema
                         | ModuleItemSpec
                         | ItemSpec
+                        | SpecLemma
 
 Const ::= Attr* VisibilityModifier? CONST_KW IDENTIFIER TypeAscription Initializer ';'
 {
@@ -803,6 +804,7 @@ private Block_specOnly_items ::= SpecInlineFunctionStmt
 
 private Block_proofOnly_items ::= ApplyLemmaStmt
                                 | SpecPredicateStmt_items
+                                | PostStmt
 
 SpecExprStmt ::= (SpecExpr_item !'}') ';' { pin = 1 }
 private SpecExpr ::= SpecPredicateStmt_items | Expr
@@ -1437,7 +1439,7 @@ ModuleItemSpec ::= spec MODULE_KW <<withStmtKind 'StmtKind.SPEC' BlockExpr>>
         "org.move.lang.core.psi.ScopeMslOnlyElement"
     ]
 }
-ItemSpec ::= (spec !MODULE_KW) ItemSpecRef ItemSpecSignature? <<withStmtKind 'StmtKind.SPEC' BlockExpr>> Proof?
+ItemSpec ::= (spec !(MODULE_KW | lemma)) ItemSpecRef ItemSpecSignature? <<withStmtKind 'StmtKind.SPEC' BlockExpr>> Proof?
 {
     pin = 1
     implements = [
@@ -1862,10 +1864,13 @@ Proof ::= proof <<withStmtKind 'StmtKind.PROOF' BlockExpr>>
 }
 Lemma ::= lemma IDENTIFIER
             TypeParameterList? FunctionParameterList <<withStmtKind 'StmtKind.SPEC' BlockExpr>>
+            Proof?
 {
     pin = 1
     extends = Stmt
 }
+// top-level item
+SpecLemma ::= spec Lemma
 
 ApplyLemmaStmt ::= ForallQuantApply? apply PathImpl ValueArgumentList ';'
 {
@@ -1875,6 +1880,8 @@ ForallQuantApply ::= forall QuantBindings QuantTriggerList?
 {
     pin = 1
 }
+PostStmt ::= post Stmt
+PostBlock ::= post BlockExpr
 ApplyLemma ::= apply PathImpl ValueArgumentList ';'
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
