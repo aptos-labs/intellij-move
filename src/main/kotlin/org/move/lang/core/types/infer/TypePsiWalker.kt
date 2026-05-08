@@ -194,7 +194,7 @@ class TypePsiWalker(
             // no-op
             is MvUseStmt,
             is MvSpecInlineFunctionStmt -> Unit
-            else -> error("unimplemented yet ${stmt.elementType}")
+            else -> inferenceErrorOrFallback(stmt, Unit)
         }
     }
 
