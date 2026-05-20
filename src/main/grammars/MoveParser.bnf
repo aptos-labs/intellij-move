@@ -149,6 +149,7 @@
 
         PROOF_KW     = 'proof_kw'
         LEMMA_KW     = 'lemma_kw'
+        SPLIT_KW     = 'split_kw'
 
         PACK     = 'pack_kw'
         UNPACK     = 'unpack_kw'
@@ -229,6 +230,7 @@ private is ::= <<isKeyword>>
 private entry ::= <<entryKeyword>>
 private inline ::= <<inlineKeyword>>
 private schema ::= <<schemaKeyword>>
+private split ::= <<splitKeyword>>
 
 private reads ::= <<readsKeyword>>
 private writes ::= <<writesKeyword>>
@@ -805,6 +807,7 @@ private Block_specOnly_items ::= SpecInlineFunctionStmt
 private Block_proofOnly_items ::= ApplyLemmaStmt
                                 | SpecPredicateStmt_items
                                 | PostStmt
+                                | SplitStmt
 
 SpecExprStmt ::= (SpecExpr_item !'}') ';' { pin = 1 }
 private SpecExpr ::= SpecPredicateStmt_items | Expr
@@ -1406,6 +1409,7 @@ private except ::= <<exceptKeyword>>
 
 private proof ::= <<proofKeyword>>
 private lemma ::= <<lemmaKeyword>>
+private split ::= <<lemmaKeyword>>
 
 ModuleSpec ::= Attr* spec PathImpl ModuleSpecBlock
 {
@@ -1896,6 +1900,8 @@ ForallQuantApply ::= forall QuantBindings QuantTriggerList?
 PostStmt ::= post Stmt
 PostBlock ::= post BlockExpr
 ApplyLemma ::= apply PathImpl ValueArgumentList ';'
+
+SplitStmt ::= split Expr ';'
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Meta rules
