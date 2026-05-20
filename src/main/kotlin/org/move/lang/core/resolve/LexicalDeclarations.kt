@@ -7,6 +7,7 @@ import org.move.lang.core.psi.ext.*
 import org.move.lang.core.resolve.ref.Ns
 import org.move.lang.core.resolve.ref.NsSet
 import org.move.lang.core.resolve.scopeEntry.*
+import org.move.stdext.chain
 import org.move.utils.PsiCachedValueProvider
 import org.move.utils.getResults
 import org.move.utils.psiCacheResult
@@ -117,6 +118,10 @@ class EntriesInResolveScopes(override val owner: MvElement): PsiCachedValueProvi
                     addAll(owner.schemaList.asEntries())
                 }
 
+                is MvApplyLemmaStmt -> {
+                    addAll(owner.forallQuantApply?.bindings.orEmpty().asEntries())
+                }
+
                 is MvQuantBindingsOwner -> {
                     addAll(owner.bindings.asEntries())
                 }
@@ -160,10 +165,10 @@ private fun getVisibleLetPatBindingsWithShadowing(
             when {
                 currentLetStmt != null -> {
                     // if post = true, then both pre and post are accessible, else only pre
-                    val letStmts = if (currentLetStmt.post) {
+                    val letStmts = if (currentLetStmt.isPost) {
                         allLetStmts
                     } else {
-                        allLetStmts.filter { !it.first.post }
+                        allLetStmts.filter { !it.first.isPost }
                     }
                     letStmts
                         // drops all let-statements after the current position
@@ -198,10 +203,11 @@ class BlockExprLetStmts(override val owner: MvBlockExpr):
     PsiCachedValueProvider<List<Pair<MvLetStmt, List<ScopeEntry>>>> {
     override fun compute(): CachedValueProvider.Result<List<Pair<MvLetStmt, List<ScopeEntry>>>> {
         val letStmts = owner.stmtList.filterIsInstance<MvLetStmt>()
+            .chain(owner.stmtList.filterIsInstance<MvPostStmt>().mapNotNull { it.stmt as? MvLetStmt })
             .map {
                 val bindings = it.pat?.bindings.orEmpty().asEntries()
                 it to bindings
             }
-        return owner.psiCacheResult(letStmts)
+        return owner.psiCacheResult(letStmts.toList())
     }
 }

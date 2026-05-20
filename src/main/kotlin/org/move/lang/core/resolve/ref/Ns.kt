@@ -23,6 +23,7 @@ enum class Ns {
     ENUM,
     ENUM_VARIANT,
     SCHEMA,
+    LEMMA,
     MODULE;
 
     companion object {
@@ -73,11 +74,13 @@ val INDEXABLE_NS = nsset(Ns.TYPE, Ns.ENUM, Ns.TUPLE_STRUCT, Ns.NAME)
 val ITEM_TYPE_NS = nsset(Ns.TYPE, Ns.TUPLE_STRUCT, Ns.ENUM)
 
 val ALL_NS = Ns.all()
-val IMPORTABLE_NS: NsSet = EnumSet.of(Ns.NAME, Ns.FUNCTION, Ns.TYPE, Ns.TUPLE_STRUCT, Ns.SCHEMA, Ns.ENUM)
+val LEMMAS = nsset(Ns.LEMMA)
+val IMPORTABLE_NS: NsSet = EnumSet.of(Ns.NAME, Ns.FUNCTION, Ns.TYPE, Ns.TUPLE_STRUCT, Ns.SCHEMA, Ns.LEMMA, Ns.ENUM)
 
 val MvNamedElement.itemNs: Ns
     get() = when (this) {
         is MvModule -> Ns.MODULE
+        is MvLemma -> Ns.LEMMA
         is MvFunctionLike -> Ns.FUNCTION
         is MvTypeParameter -> Ns.TYPE
         is MvStruct -> if (this.tupleFields != null) Ns.TUPLE_STRUCT else Ns.TYPE

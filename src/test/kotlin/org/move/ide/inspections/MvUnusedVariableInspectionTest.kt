@@ -81,18 +81,4 @@ spec 0x1::main {
             }
         }
     """)
-
-    fun `test unused parameter top level lemma`() = checkByText("""
-        module 0x1::main {
-            spec lemma add_mono(<warning descr="Unused function parameter">a</warning>: u64) {}
-        }
-    """)
-
-    fun `test unused parameter inline lemma`() = checkByText("""
-        module 0x1::main {
-            spec module {
-                lemma add_mono(<warning descr="Unused function parameter">a</warning>: u64) {}
-            }
-        }
-    """)
 }

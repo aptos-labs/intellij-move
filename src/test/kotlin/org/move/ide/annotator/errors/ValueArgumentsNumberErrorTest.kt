@@ -127,7 +127,7 @@ class ValueArgumentsNumberErrorTest: AnnotatorTestCase(MvErrorAnnotator::class) 
                 forall _a: u64 apply add_mono(<error descr="This function takes 1 parameter but 0 parameters were supplied">)</error>;
                 forall _a: u64 apply add_mono(1);
                 forall _a: u64 apply add_mono(1, <error descr="This function takes 1 parameter but 2 parameters were supplied">1</error>);
-                forall _a: u64 apply add_mono(1, <error descr="This function takes 1 parameter but 3 parameters were supplied">1, 1</error>);
+                forall _a: u64 apply add_mono(1, <error descr="This function takes 1 parameter but 3 parameters were supplied">1</error>, <error descr="This function takes 1 parameter but 3 parameters were supplied">1</error>);
             }
         }
     """)

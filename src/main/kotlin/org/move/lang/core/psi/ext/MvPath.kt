@@ -121,6 +121,8 @@ fun MvPath.allowedNamespaces(isCompletion: Boolean = false): NsSet {
                 || parent is MvPatConst
                 || parent is MvPatTupleStruct -> CONTAINER_TYPE_NS
 
+        parent is MvApplyLemmaStmt -> LEMMAS
+
         parent is MvFriendDecl -> MODULES
         parent is MvModuleSpec -> MODULES
 

@@ -18,12 +18,11 @@ import org.move.lang.core.types.ty.hasTyInfer
 interface MvFunctionLike: MvNameIdentifierOwner,
                           MvGenericDeclaration,
                           MvDocAndAttributeOwner {
-
-    val codeBlock: MvBlockExpr?
-
     val functionParameterList: MvFunctionParameterList?
 
     val returnType: MvReturnType?
+
+    val codeBlock: MvBlockExpr?
 }
 
 val MvFunctionLike.isNative get() = hasChild(MvElementTypes.NATIVE)

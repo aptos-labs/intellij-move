@@ -29,6 +29,8 @@ fun MvBlockExpr.specInlineFunctions(): List<MvSpecInlineFunction> {
         .map { it.specInlineFunction }
 }
 
+fun MvBlockExpr.lemmas(): List<MvLemma> = childrenOfType()
+
 //val MvCodeBlock.rightBrace: PsiElement? get() = this.findLastChildByType(R_BRACE)
 
 //val MvCodeBlock.letStmts: List<MvLetStmt> get() = stmtList.filterIsInstance<MvLetStmt>()

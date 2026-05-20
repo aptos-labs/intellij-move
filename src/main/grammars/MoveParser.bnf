@@ -1861,6 +1861,9 @@ TypeQuantBinding ::= PatBinding TypeAscription {
 Proof ::= proof <<withStmtKind 'StmtKind.PROOF' BlockExpr>>
 {
     pin = 1
+    implements = [
+        "org.move.lang.core.psi.ScopeMslOnlyElement"
+    ]
 }
 Lemma ::= lemma IDENTIFIER
             TypeParameterList? FunctionParameterList <<withStmtKind 'StmtKind.SPEC' BlockExpr>>
@@ -1868,6 +1871,14 @@ Lemma ::= lemma IDENTIFIER
 {
     pin = 1
     extends = Stmt
+    implements = [
+        "org.move.lang.core.psi.MvFunctionLike"
+        "org.move.lang.core.psi.ext.MvItemElement"
+        "org.move.lang.core.types.infer.MvInferenceContextOwner"
+        "org.move.lang.core.psi.ScopeMslOnlyElement"
+        "org.move.lang.core.psi.MvModificationTrackerOwner"
+    ]
+    mixin = "org.move.lang.core.psi.ext.MvLemmaMixin"
 }
 // top-level item
 SpecLemma ::= spec Lemma
@@ -1875,10 +1886,12 @@ SpecLemma ::= spec Lemma
 ApplyLemmaStmt ::= ForallQuantApply? apply PathImpl ValueArgumentList ';'
 {
     pin = "apply"
+    implements = [ "org.move.lang.core.psi.ext.MvCallable" ]
 }
 ForallQuantApply ::= forall QuantBindings QuantTriggerList?
 {
     pin = 1
+    implements = [ "org.move.lang.core.psi.ext.MvQuantBindingsOwner" ]
 }
 PostStmt ::= post Stmt
 PostBlock ::= post BlockExpr

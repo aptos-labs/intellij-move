@@ -26,35 +26,29 @@ class CallInfo(
     companion object {
         fun resolve(callable: MvCallable): CallInfo? {
             val callInfo = when (callable) {
-                is MvCallExpr -> resolveCallExpr(callable)
-                is MvMethodCall -> resolveMethodCall(callable)
-                is MvAssertMacroExpr -> resolveAssertExpr()
-                else -> error("exhaustive")
+                is MvAssertMacroExpr -> resolveAssertMacroExpr()
+                else -> resolveCallable(callable)
             }
             return callInfo
         }
 
-        private fun resolveCallExpr(callExpr: MvCallExpr): CallInfo? {
-            val msl = callExpr.isMsl()
-            val callTy = callExpr.inference(msl)?.getCallableType(callExpr) as? TyCallable
+        private fun resolveCallable(callable: MvCallable): CallInfo? {
+            val msl = callable.isMsl()
+            val callTy = callable.inference(msl)?.getCallableType(callable) as? TyCallable
                 ?: return null
             val callKind = callTy.kind as? CallKind.Function ?: return null
             var callItem: MvElement = callKind.item
-            if (callItem is MvEnum) {
-                callItem = callExpr.path?.reference?.resolveFollowingAliases() ?: return null
+            when (callable) {
+                is MvCallExpr -> {
+                    if (callItem is MvEnum) {
+                        callItem = callable.path?.reference?.resolveFollowingAliases() ?: return null
+                    }
+                }
             }
             return buildFunctionParameters(callItem, callTy)
         }
 
-        private fun resolveMethodCall(methodCall: MvMethodCall): CallInfo? {
-            val msl = methodCall.isMsl()
-            val callTy = methodCall.inference(msl)?.getCallableType(methodCall) as? TyCallable
-                ?: return null
-            val callKind = callTy.genericKind() ?: return null
-            return buildFunctionParameters(callKind.item, callTy)
-        }
-
-        private fun resolveAssertExpr(): CallInfo {
+        private fun resolveAssertMacroExpr(): CallInfo {
             return CallInfo(null, buildList {
                 add(Parameter("_", null, TyBool))
                 add(Parameter("err", null, TyInteger(TyInteger.Kind.u64)))
