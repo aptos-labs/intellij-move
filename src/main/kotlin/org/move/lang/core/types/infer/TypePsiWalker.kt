@@ -188,6 +188,9 @@ class TypePsiWalker(
             }
             is MvPostStmt -> processStmt(stmt.stmt)
             is MvApplyLemmaStmt -> processApplyLemmaStmt(stmt)
+            is MvSplitStmt -> {
+                stmt.expr.inferType()
+            }
             // no-op
             is MvUseStmt,
             is MvLemma,

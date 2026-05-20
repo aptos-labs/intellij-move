@@ -560,6 +560,13 @@ object MoveParserUtil: GeneratedParserUtilBase() {
         LEMMA_KW
     )
 
+    @JvmStatic
+    fun splitKeyword(b: PsiBuilder, level: Int): Boolean = contextualKeyword(
+        b,
+        "split",
+        SPLIT_KW
+    )
+
     private val FLAGS: Key<Int> = Key("MoveParserUtil.FLAGS")
     private var PsiBuilder.flags: Int
         get() = getUserData(FLAGS) ?: DEFAULT_FLAGS

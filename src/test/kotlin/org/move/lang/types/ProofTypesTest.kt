@@ -34,4 +34,15 @@ class ProofTypesTest: TypificationTestCase() {
             }
         }
     """)
+
+    fun `test split stmt`() = testExpr("""
+        module 0x1::main {
+            spec module {
+                lemma add_zero_right(x: u64) {
+                    split 1 + 1;
+                        //^ num
+                }
+            }
+        }
+    """)
 }
