@@ -172,11 +172,13 @@ class InferenceContext(
         when (owner) {
             is MvFunctionLike -> owner.codeBlock?.let {
                 inference.inferBlockExpr(it, Expected.fromType(inference.expectedReturnTy))
-//                inference.inferBlockExpr()
-//                inference.inferCodeBlock(it)
+                if (owner is MvLemma) {
+                    owner.proof?.codeBlock?.let { inference.inferMslBlockExpr(it, Expected.NoValue) }
+                }
             }
             is MvItemSpec -> {
                 owner.codeBlock?.let { inference.inferMslBlockExpr(it, Expected.NoValue) }
+                owner.proof?.codeBlock?.let { inference.inferMslBlockExpr(it, Expected.NoValue) }
             }
             is MvModuleItemSpec -> owner.codeBlock?.let {
                 inference.inferMslBlockExpr(it, Expected.NoValue)

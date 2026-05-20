@@ -71,7 +71,7 @@ spec 0x1::main {
     fun `test variable used as implicit schema parameter with existing fields`() = checkByText("""
         module 0x1::m {
             fun call() {}
-            spec schema MySchema { 
+            spec schema MySchema {
                 account_addr: address;
                 amount: u8;
             }
@@ -79,6 +79,6 @@ spec 0x1::main {
                 let account_addr = @0x1;
                 include MySchema { amount: 100 };
             }
-        }        
+        }
     """)
 }

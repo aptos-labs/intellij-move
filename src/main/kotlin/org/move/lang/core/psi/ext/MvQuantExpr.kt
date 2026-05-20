@@ -6,10 +6,13 @@ interface MvQuantBindingsOwner: MvElement {
     val quantBindings: MvQuantBindings?
 }
 
-interface MvQuantExpr : MvQuantBindingsOwner {
+interface MvQuantExpr: MvQuantBindingsOwner {
     val expr: MvExpr?
     val quantWhere: MvQuantWhere?
+    val quantTriggerList: MvQuantTriggerList?
 }
+
+val MvQuantExpr.triggerExprs: List<MvExpr> get() = this.quantTriggerList?.exprList.orEmpty()
 
 val MvQuantBindingsOwner.bindings: List<MvPatBinding>
     get() = quantBindings?.quantBindingList.orEmpty().mapNotNull { it.binding }

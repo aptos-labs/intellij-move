@@ -319,7 +319,7 @@ class MvErrorAnnotator: MvAnnotatorBase() {
         // use range, because assert! can have either 1 or 2 arguments
         val expectedRange =
             when (callable) {
-                is MvCallExpr -> {
+                is MvCallExpr, is MvApplyLemmaStmt -> {
                     val callTy = inference.getCallableType(callable) as? TyCallable ?: return
                     val count = callTy.paramTypes.size
                     IntRange(count, count)

@@ -10,7 +10,7 @@ import org.move.ide.formatter.impl.location
 import org.move.lang.core.completion.providers.dropInvisibleEntries
 import org.move.lang.core.psi.*
 import org.move.lang.core.psi.ext.*
-import org.move.lang.core.psi.ext.post
+import org.move.lang.core.psi.ext.isPost
 import org.move.lang.core.resolve.getEntriesFromWalkingScopes
 import org.move.lang.core.resolve.getFieldLookupResolveVariants
 import org.move.lang.core.resolve.getMethodResolveVariants
@@ -76,11 +76,6 @@ class TypePsiWalker(
         }
     }
 
-//    fun inferReturningBlockExpr(blockExpr: MvBlockExpr) {
-//        val expected = Expected.fromType(expectedReturnTy)
-//        inferBlockExpr(blockExpr, expected)
-//    }
-
     fun inferMslBlockExpr(blockExpr: MvBlockExpr, expected: Expected): Ty {
         return mslScope { inferBlockExpr(blockExpr, expected) }
     }
@@ -90,8 +85,8 @@ class TypePsiWalker(
             // reorder stmts, move let stmts to the top, then let post, then others
             blockExpr.stmtListNoTailExpr.sortedBy {
                 when (it) {
-                    is MvLetStmt if !it.post -> 0
-                    is MvLetStmt if it.post -> 1
+                    is MvLetStmt if !it.isPost -> 0
+                    is MvLetStmt if it.isPost -> 1
                     else -> 2
                 }
             }
@@ -191,8 +186,11 @@ class TypePsiWalker(
             is MvAbortsWithStmt -> {
                 stmt.exprList.forEach { it.inferTypeCoercableTo(TyNum) }
             }
+            is MvPostStmt -> processStmt(stmt.stmt)
+            is MvApplyLemmaStmt -> processApplyLemmaStmt(stmt)
             // no-op
             is MvUseStmt,
+            is MvLemma,
             is MvSpecInlineFunctionStmt -> Unit
             else -> inferenceErrorOrFallback(stmt, Unit)
         }
@@ -222,6 +220,40 @@ class TypePsiWalker(
             this,
             explicitTy ?: resolveTypeVarsIfPossible(initializerTy)
         )
+    }
+
+    private fun processApplyLemmaStmt(stmt: MvApplyLemmaStmt) {
+        val forallQuantApply = stmt.forallQuantApply
+        if (forallQuantApply != null) {
+            forallQuantApply.quantBindings?.quantBindingList.orEmpty()
+                .forEach { collectQuantBinding(it) }
+            for (triggerExpr in forallQuantApply.triggerExprs) {
+                triggerExpr.inferType()
+            }
+        }
+
+        val path = stmt.path ?: return
+        val item = resolvePathCached(path, expectedType = null)
+        val callTy = when (item) {
+            is MvFunctionLike -> {
+                instantiatePath<TyCallable>(path, item) ?: TyCallable.fake(
+                    stmt.valueArguments.size,
+                    CallKind.Function.fake(project)
+                )
+            }
+            else -> TyCallable.fake(
+                stmt.valueArguments.size,
+                CallKind.Function.fake(project)
+            )
+        }
+
+        coerceArgumentTypes(
+            stmt.argumentExprs.map { CallArg.Arg(it) },
+            callTy.paramTypes,
+            emptyList(),
+        )
+
+        writeCallableType(stmt, callTy, method = false)
     }
 
     private fun processConditionPredicateStmt(predicateStmt: MvConditionPredicateStmt) {
@@ -1027,6 +1059,9 @@ class TypePsiWalker(
             .forEach {
                 collectQuantBinding(it)
             }
+        for (expr in quantExpr.triggerExprs) {
+            expr.inferType()
+        }
         quantExpr.quantWhere?.expr?.inferTypeCoercableTo(TyBool)
         quantExpr.expr?.inferTypeCoercableTo(TyBool)
         return TyBool

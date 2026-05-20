@@ -2,6 +2,7 @@ package org.move.lang.core.psi.ext
 
 import org.move.lang.core.psi.MvBlockExpr
 import org.move.lang.core.psi.MvItemSpec
+import org.move.lang.core.psi.MvLemma
 import org.move.lang.core.psi.MvModuleItemSpec
 import org.move.lang.core.psi.MvSpecInlineFunction
 import org.move.lang.core.psi.MvSpecInlineFunctionStmt
@@ -13,5 +14,11 @@ fun MvModuleItemSpec.specInlineFunctions(): List<MvSpecInlineFunction> {
     return this.codeBlock?.stmtList
         ?.filterIsInstance<MvSpecInlineFunctionStmt>()
         ?.map { it.specInlineFunction }
+        .orEmpty()
+}
+
+fun MvModuleItemSpec.lemmas(): List<MvLemma> {
+    return this.codeBlock?.stmtList
+        ?.filterIsInstance<MvLemma>()
         .orEmpty()
 }
