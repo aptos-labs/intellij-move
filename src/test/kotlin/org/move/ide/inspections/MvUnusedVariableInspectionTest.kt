@@ -71,7 +71,7 @@ spec 0x1::main {
     fun `test variable used as implicit schema parameter with existing fields`() = checkByText("""
         module 0x1::m {
             fun call() {}
-            spec schema MySchema { 
+            spec schema MySchema {
                 account_addr: address;
                 amount: u8;
             }
@@ -79,6 +79,20 @@ spec 0x1::main {
                 let account_addr = @0x1;
                 include MySchema { amount: 100 };
             }
-        }        
+        }
+    """)
+
+    fun `test unused parameter top level lemma`() = checkByText("""
+        module 0x1::main {
+            spec lemma add_mono(<warning descr="Unused function parameter">a</warning>: u64) {}
+        }
+    """)
+
+    fun `test unused parameter inline lemma`() = checkByText("""
+        module 0x1::main {
+            spec module {
+                lemma add_mono(<warning descr="Unused function parameter">a</warning>: u64) {}
+            }
+        }
     """)
 }

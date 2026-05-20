@@ -1794,4 +1794,15 @@ module 0x1::pool {
             }
         }
     """)
+
+    fun `test check apply lemma arguments`() = checkErrors("""
+        module 0x1::main {
+            fun main() {}
+            spec lemma add_mono(_a: u64) {}
+            spec main {} proof {
+                forall _a: u64 apply add_mono(<error descr="Incompatible type 'bool', expected 'num'">true</error>);
+                forall _a: u64 apply add_mono(1);
+            }
+        }
+    """)
 }
