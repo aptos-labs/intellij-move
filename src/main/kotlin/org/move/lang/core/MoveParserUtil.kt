@@ -455,15 +455,6 @@ object MoveParserUtil: GeneratedParserUtilBase() {
     fun forKeyword(b: PsiBuilder, level: Int): Boolean = contextualKeyword(b, "for", FOR)
 
     @JvmStatic
-    fun readsKeyword(b: PsiBuilder, level: Int): Boolean = contextualKeyword(b, "reads", READS)
-
-    @JvmStatic
-    fun writesKeyword(b: PsiBuilder, level: Int): Boolean = contextualKeyword(b, "writes", WRITES)
-
-    @JvmStatic
-    fun pureKeyword(b: PsiBuilder, level: Int): Boolean = contextualKeyword(b, "pure", PURE)
-
-    @JvmStatic
     fun pragmaKeyword(b: PsiBuilder, level: Int): Boolean = contextualKeyword(b, "pragma", PRAGMA)
 
     @JvmStatic
@@ -565,6 +556,13 @@ object MoveParserUtil: GeneratedParserUtilBase() {
         b,
         "split",
         SPLIT_KW
+    )
+
+    @JvmStatic
+    fun weightKeyword(b: PsiBuilder, level: Int): Boolean = contextualKeyword(
+        b,
+        "weight",
+        WEIGHT_KW
     )
 
     private val FLAGS: Key<Int> = Key("MoveParserUtil.FLAGS")

@@ -121,10 +121,6 @@
         PACKAGE     = 'package_kw'
         FOR     = 'for_kw'
 
-        READS     = 'reads_kw'
-        WRITES     = 'writes_kw'
-        PURE     = 'pure_kw'
-
         SCRIPT_KW     = 'script_kw'
         MODULE_KW     = 'module'
         STRUCT_KW     = 'struct_kw'
@@ -150,6 +146,7 @@
         PROOF_KW     = 'proof_kw'
         LEMMA_KW     = 'lemma_kw'
         SPLIT_KW     = 'split_kw'
+        WEIGHT_KW     = 'weight_kw'
 
         PACK     = 'pack_kw'
         UNPACK     = 'unpack_kw'
@@ -231,10 +228,7 @@ private entry ::= <<entryKeyword>>
 private inline ::= <<inlineKeyword>>
 private schema ::= <<schemaKeyword>>
 private split ::= <<splitKeyword>>
-
-private reads ::= <<readsKeyword>>
-private writes ::= <<writesKeyword>>
-private pure ::= <<pureKeyword>>
+private weight ::= <<weightKeyword>>
 
 AddressDef ::= address AddressRef AddressBlock {
     pin = 1
@@ -315,14 +309,16 @@ private SpecFunctionItem ::= SpecFunctionInner
                             | NativeSpecFunctionInner
 
 SpecFunctionInner ::= Attr* spec fun IDENTIFIER TypeParameterList?
-                       FunctionParameterList ReturnType? (<<withStmtKind 'StmtKind.SPEC' BlockExpr>> | ';')
+                       FunctionParameterList ReturnType? Weight?
+                       (<<withStmtKind 'StmtKind.SPEC' BlockExpr>> | ';')
 {
     pin = 3
     elementType = SpecFunction
     hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
 }
 NativeSpecFunctionInner ::= Attr* spec (native fun) IDENTIFIER TypeParameterList?
-                             FunctionParameterList ReturnType? ';'
+                             FunctionParameterList ReturnType? Weight?
+                             ';'
 {
     pin = 3
     elementType = SpecFunction
@@ -348,14 +344,16 @@ fake SpecInlineFunction ::= Attr* native? fun IDENTIFIER? TypeParameterList?
 //                                    | UninterpretedSpecInlineFunctionInner
 
 SpecInlineFunctionInner ::= Attr* fun IDENTIFIER TypeParameterList?
-                             FunctionParameterList ReturnType? (<<withStmtKind 'StmtKind.SPEC' BlockExpr>> | ';')
+                             FunctionParameterList ReturnType? Weight?
+                             (<<withStmtKind 'StmtKind.SPEC' BlockExpr>> | ';')
 {
     pin = 2
     elementType = SpecInlineFunction
     hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
 }
 NativeSpecInlineFunctionInner ::= Attr* (native fun) IDENTIFIER TypeParameterList?
-                                  FunctionParameterList ReturnType? ';'
+                                  FunctionParameterList ReturnType? Weight?
+                                  ';'
 {
     pin = 2
     elementType = SpecInlineFunction
@@ -369,6 +367,7 @@ SpecInlineFunctionStmt ::= SpecInlineFunctionInner
         "org.move.lang.core.psi.MslOnlyElement"
     ]
 }
+Weight ::= '[' weight '=' LitExpr ']'
 
 Struct ::= Attr* VisibilityModifier? STRUCT_KW IDENTIFIER TypeParameterList?
             // abilities are at the beginning or at the end
@@ -449,10 +448,6 @@ fake Function ::= Attr* native? VisibilityModifier? entry? inline?
     hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
 }
 
-private FunctionInnerVisFirst ::= FunctionModifierSetInner? fun
-private FunctionInnerNoVisFirst ::= fun
-private FunctionInnerFirst ::= FunctionInnerVisFirst
-
 FunctionInner ::= Attr* FunctionModifiers? fun FunctionSignatureInner (BlockExpr | ';')
 {
     pin = "fun"
@@ -517,7 +512,7 @@ private ReturnTypeItem_with_recover ::= Type
     pin = 1
     recoverWhile = ReturnTypeItem_recover
 }
-private ReturnTypeItem_recover ::= !( '{' | ';' | acquires | reads | writes | pure | '!' )
+private ReturnTypeItem_recover ::= !( '{' | ';' | acquires | '!' | '[' )
 
 // acquires T, Record
 AcquiresType ::= acquires AcquiresType_items { pin = 1 }
@@ -1409,7 +1404,6 @@ private except ::= <<exceptKeyword>>
 
 private proof ::= <<proofKeyword>>
 private lemma ::= <<lemmaKeyword>>
-private split ::= <<lemmaKeyword>>
 
 ModuleSpec ::= Attr* spec PathImpl ModuleSpecBlock
 {
@@ -1818,7 +1812,7 @@ QuantWhere ::= where Expr
     implements = [ "org.move.lang.core.psi.MslOnlyElement" ]
 }
 
-ForallQuantExpr ::= <<specOnly forall>> QuantBindings QuantTriggerList? QuantWhere? ':' Expr
+ForallQuantExpr ::= <<specOnly forall>> QuantBindings QuantTriggerList? Weight? QuantWhere? ':' Expr
 {
     pin = 1
     rightAssociative = true
@@ -1827,7 +1821,7 @@ ForallQuantExpr ::= <<specOnly forall>> QuantBindings QuantTriggerList? QuantWhe
         "org.move.lang.core.psi.MslOnlyElement"
     ]
 }
-ExistsQuantExpr ::= <<specOnly exists>> QuantBindings QuantTriggerList? QuantWhere? ':' Expr
+ExistsQuantExpr ::= <<specOnly exists>> QuantBindings QuantTriggerList? Weight? QuantWhere? ':' Expr
 {
     pin = 1
     rightAssociative = true
@@ -1892,7 +1886,7 @@ ApplyLemmaStmt ::= ForallQuantApply? apply PathImpl ValueArgumentList ';'
     pin = "apply"
     implements = [ "org.move.lang.core.psi.ext.MvCallable" ]
 }
-ForallQuantApply ::= forall QuantBindings QuantTriggerList?
+ForallQuantApply ::= forall QuantBindings QuantTriggerList? Weight?
 {
     pin = 1
     implements = [ "org.move.lang.core.psi.ext.MvQuantBindingsOwner" ]
