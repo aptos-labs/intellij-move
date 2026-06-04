@@ -1065,6 +1065,7 @@ class TypePsiWalker(
         for (expr in quantExpr.triggerExprs) {
             expr.inferType()
         }
+        quantExpr.weight?.expr?.inferTypeCoercableTo(TyInteger(TyInteger.Kind.u32))
         quantExpr.quantWhere?.expr?.inferTypeCoercableTo(TyBool)
         quantExpr.expr?.inferTypeCoercableTo(TyBool)
         return TyBool

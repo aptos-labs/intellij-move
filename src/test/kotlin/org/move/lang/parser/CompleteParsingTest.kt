@@ -79,6 +79,7 @@ class CompleteParsingTest: MvParsingTestCase("complete") {
     fun `test top level lemma with proof`() = doTest()
     fun `test post blocks`() = doTest()
     fun `test split`() = doTest()
+    fun `test spec weights`() = doTest()
 
     fun doTest() {
         super.doTest(true, true)

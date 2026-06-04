@@ -10,6 +10,7 @@ interface MvQuantExpr: MvQuantBindingsOwner {
     val expr: MvExpr?
     val quantWhere: MvQuantWhere?
     val quantTriggerList: MvQuantTriggerList?
+    val weight: MvWeight?
 }
 
 val MvQuantExpr.triggerExprs: List<MvExpr> get() = this.quantTriggerList?.exprList.orEmpty()
