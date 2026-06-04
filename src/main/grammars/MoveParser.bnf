@@ -367,7 +367,7 @@ SpecInlineFunctionStmt ::= SpecInlineFunctionInner
         "org.move.lang.core.psi.MslOnlyElement"
     ]
 }
-Weight ::= '[' weight '=' LitExpr ']'
+Weight ::= '[' weight '=' Expr ']'
 
 Struct ::= Attr* VisibilityModifier? STRUCT_KW IDENTIFIER TypeParameterList?
             // abilities are at the beginning or at the end

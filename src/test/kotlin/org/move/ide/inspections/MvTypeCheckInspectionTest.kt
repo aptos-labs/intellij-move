@@ -1805,4 +1805,16 @@ module 0x1::pool {
             }
         }
     """)
+
+    fun `test check weight positive integer`() = checkErrors("""
+        module 0x1::m {
+            fun main() {}
+            spec main {
+                forall y: u64 [weight = 10]: y == y;
+                forall y: u64 [weight = 10u128]: y == y;
+                forall y: u64 [weight = -10]: y == y;
+                forall y: u64 [weight = <error descr="Incompatible type 'bool', expected 'u32'">false</error>]: y == y;
+            }
+        }
+    """)
 }
