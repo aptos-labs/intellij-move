@@ -16,7 +16,7 @@
     tokenTypeClass="org.move.lang.core.MvTokenType"
 
     extends(".*Expr")=Expr
-    extends("Pat(Struct|TupleStruct|Binding|Tuple|Wild|Rest|Const)")=Pat
+    extends("Pat(Struct|TupleStruct|Binding|Tuple|Wild|Rest|Const|Range)")=Pat
     extends("(Lambda|Ref|Path|Tuple|Unit|Parens)Type")=Type
 
     elementType(".+BinExpr")=BinaryExpr
@@ -692,16 +692,20 @@ TypeArgument ::= Type
 //        | ConstPat
 
 Pat ::= PatWild
-        | PatRest
+        | (PatRest !PatConst)
         | PatTuple
         | PatBinding
         | PatStruct
         | PatTupleStruct
-        | PatConst
+        | PatConst !('..' | '...' | '..=')
+        | PatRange
 
 PatWild ::= '_'
 PatRest ::= '..'
-PatConst ::= PathExpr
+PatConst ::= PathExpr | LitExpr
+PatRange ::= PatConst? ('..' | '...' | '..=') PatConst? { pin = 2 }
+
+PatInt ::= LitExpr
 
 // XXX(matklad): it is impossible to distinguish between nullary enum variants
 // and identifiers during parsing.

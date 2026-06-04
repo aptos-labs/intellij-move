@@ -12,17 +12,19 @@ import org.move.lang.core.types.ty.Mutability.IMMUTABLE
 fun MvPat.collectBindings(fcx: TypePsiWalker, ty: Ty, defBm: RsBindingModeKind = BindByValue) {
     when (this) {
         is MvPatWild -> fcx.ctx.writePatTy(this, ty)
-        is MvPatConst -> {
-            // fills resolved paths
-            val inferred = fcx.inferExprType(this.pathExpr)
-            val item = fcx.ctx.resolvedPaths[this.pathExpr.path]?.singleOrNull { it.isVisible }?.element
-            val patTy = when (item) {
-                // copied from intellij-rust, don't know what it's about
-                is MvConst -> ty
-                else -> ty.stripReferences(defBm).first
+        is MvPatConst -> when (val innerExpr = this.expr) {
+            is MvPathExpr -> {
+                // fills resolved paths
+                val inferred = fcx.inferExprType(innerExpr)
+                val item = fcx.ctx.resolvedPaths[innerExpr.path]?.singleOrNull { it.isVisible }?.element
+                val patTy = when (item) {
+                    // copied from intellij-rust, don't know what it's about
+                    is MvConst -> ty
+                    else -> ty.stripReferences(defBm).first
+                }
+                fcx.coerceTypes(innerExpr, inferred, patTy)
+                fcx.writePatTy(this, patTy)
             }
-            fcx.coerceTypes(pathExpr, inferred, patTy)
-            fcx.writePatTy(this, patTy)
         }
         is MvPatBinding -> {
             val resolveVariants = resolvePatBindingWithExpectedType(this, expectedType = ty)

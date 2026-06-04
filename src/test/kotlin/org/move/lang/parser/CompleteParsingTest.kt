@@ -52,6 +52,7 @@ class CompleteParsingTest: MvParsingTestCase("complete") {
     fun `test public package`() = doTest()
     fun `test enums`() = doTest()
     fun `test match`() = doTest()
+    fun `test match with ints`() = doTest()
     fun `test positional fields`() = doTest()
 
     fun `test cast expr`() = doTest()
