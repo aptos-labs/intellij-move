@@ -1817,4 +1817,21 @@ module 0x1::pool {
             }
         }
     """)
+
+    fun `test check match integer`() = checkErrors("""
+        module 0x1::m {
+            fun main1(): bool {
+                let x = 0u8;
+                match (x) {
+                    0 => true,
+                    1 => false,
+                    2..3 => false,
+                    <error descr="Incompatible type 'u16', expected 'u8'">2u16</error>..<error descr="Incompatible type 'u16', expected 'u8'">3u16</error> => false,
+                    <error descr="Incompatible type 'address', expected 'u8'">@0x1</error> => false,
+                    <error descr="Incompatible type 'bool', expected 'u8'">true</error> => false,
+                }
+            }
+        }
+    """)
 }
+
