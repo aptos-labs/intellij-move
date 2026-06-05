@@ -9,14 +9,14 @@ val MvAssertMacroExpr.identifier: PsiElement get() = this.findFirstChildByType(I
 enum class AssertKind {
     PLAIN,
     EQ,
-    NOT_EQ;
+    NOT_EQ,
 }
 
 val MvAssertMacroExpr.assertKind: AssertKind
     get() =
         when (this.identifier.text) {
-            "assert" -> AssertKind.PLAIN
-            "assert_eq" -> AssertKind.EQ
-            "assert_ne" -> AssertKind.NOT_EQ
+            "assert", "debug_assert" -> AssertKind.PLAIN
+            "assert_eq", "debug_assert_eq" -> AssertKind.EQ
+            "assert_ne", "debug_assert_ne" -> AssertKind.NOT_EQ
             else -> error("exhaustive")
         }
