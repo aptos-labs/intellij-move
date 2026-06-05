@@ -703,7 +703,14 @@ Pat ::= PatWild
 PatWild ::= '_'
 PatRest ::= '..'
 PatConst ::= PathExpr | LitExpr
-PatRange ::= PatConst? ('..' | '...' | '..=') PatConst? { pin = 2 }
+PatRange ::= PatConst? ('..' | '...' | '..=') PatConst?
+{
+    pin = 2
+    methods = [
+        left="/PatConst[0]"
+        right="/PatConst[1]"
+    ]
+}
 
 PatInt ::= LitExpr
 

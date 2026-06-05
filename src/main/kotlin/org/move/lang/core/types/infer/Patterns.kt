@@ -25,6 +25,15 @@ fun MvPat.collectBindings(fcx: TypePsiWalker, ty: Ty, defBm: RsBindingModeKind =
                 fcx.coerceTypes(innerExpr, inferred, patTy)
                 fcx.writePatTy(this, patTy)
             }
+            is MvLitExpr -> {
+                val inferred = fcx.inferExprType(innerExpr)
+                fcx.coerceTypes(innerExpr, inferred, ty)
+                fcx.writePatTy(this, ty)
+            }
+        }
+        is MvPatRange -> {
+            this.left?.collectBindings(fcx, ty, defBm)
+            this.right?.collectBindings(fcx, ty, defBm)
         }
         is MvPatBinding -> {
             val resolveVariants = resolvePatBindingWithExpectedType(this, expectedType = ty)
