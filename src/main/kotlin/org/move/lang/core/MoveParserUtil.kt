@@ -409,9 +409,14 @@ object MoveParserUtil: GeneratedParserUtilBase() {
 
     @JvmStatic
     fun assertIdent(b: PsiBuilder, level: Int): Boolean {
-        return (nextTokenIs(b, "assert")
-                || nextTokenIs(b, "assert_eq")
-                || nextTokenIs(b, "assert_ne"))
+        return (
+                nextTokenIs(b, "assert")
+                        || nextTokenIs(b, "assert_eq")
+                        || nextTokenIs(b, "assert_ne")
+                        || nextTokenIs(b, "debug_assert")
+                        || nextTokenIs(b, "debug_assert_eq")
+                        || nextTokenIs(b, "debug_assert_ne")
+                )
                 && consumeToken(b, IDENTIFIER)
     }
 
