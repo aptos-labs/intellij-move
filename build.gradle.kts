@@ -1,6 +1,5 @@
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -17,20 +16,20 @@ fun prop(name: String): String =
 
 val shortPlatformVersion = prop("shortPlatformVersion")
 val createUseInstaller = prop("useInstaller").toBooleanStrict()
-val codeVersion = "1.55.0"
+val codeVersion = "1.56.0"
 
 val pluginVersion = "$codeVersion.$shortPlatformVersion"
 val pluginGroup = "org.move"
 val pluginName = "intellij-move"
 
-val kotlinReflectVersion = "2.2.20"
+val kotlinReflectVersion = "2.4.0"
 
 group = pluginGroup
 version = pluginVersion
 
 plugins {
     id("java")
-    kotlin("jvm") version "2.3.20"
+    kotlin("jvm") version "2.4.0"
     id("org.jetbrains.intellij.platform") version "2.13.1"
     id("org.jetbrains.intellij.platform.grammarkit") version "2.13.1"
 //    id("org.jetbrains.grammarkit") version "2023.3.0.3"
