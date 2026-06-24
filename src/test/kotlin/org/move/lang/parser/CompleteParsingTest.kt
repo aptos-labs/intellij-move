@@ -68,6 +68,7 @@ class CompleteParsingTest: MvParsingTestCase("complete") {
     fun `test signed integers`() = doTest()
     fun `test no turbofish method call`() = doTest()
     fun `test spec block with lambdas`() = doTest()
+    fun `test behavior predicates`() = doTest()
 
     fun `test public struct`() = doTest()
     fun `test public enum`() = doTest()

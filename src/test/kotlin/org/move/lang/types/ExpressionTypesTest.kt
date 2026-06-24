@@ -364,6 +364,18 @@ class ExpressionTypesTest : TypificationTestCase() {
     """
     )
 
+    fun `test behavior predicate expr type`() = testExpr(
+        """
+    module 0x1::M {
+        fun call(val: u8): u8 { val }
+        spec module {
+            aborts_of<call>(1);
+          //^ bool
+        }
+    }    
+    """
+    )
+
     fun `test msl ref is type`() = testExpr(
         """
     module 0x1::M {

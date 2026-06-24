@@ -1178,6 +1178,93 @@ module 0x1::mod {
     """
     )
 
+    fun `test resolve function value under aborts of`() = checkByCode(
+        """
+        module 0x1::m {
+            fun main() {}
+              //X
+            spec main {
+                aborts_of<main>();
+                         //^
+            }
+        }
+    """
+    )
+
+    fun `test resolve function value under requires of`() = checkByCode(
+        """
+        module 0x1::m {
+            fun main() {}
+              //X
+            spec main {
+                requires_of<main>();
+                           //^
+            }
+        }
+    """
+    )
+
+    fun `test resolve function value under ensures of`() = checkByCode(
+        """
+        module 0x1::m {
+            fun main() {}
+              //X
+            spec main {
+                ensures_of<main>();
+                          //^
+            }
+        }
+    """
+    )
+
+    fun `test resolve function value under result of`() = checkByCode(
+        """
+        module 0x1::m {
+            fun main() {}
+              //X
+            spec main {
+                result_of<main>();
+                         //^
+            }
+        }
+    """
+    )
+
+    fun `test resolve function value under result of in other module`() = checkByCode(
+        """
+        module 0x1::config {
+            public fun call() {}
+                     //X
+        }
+        module 0x1::m {
+            use 0x1::config;
+            fun main() {}
+            spec main {
+                ensures result_of<config::call>();
+                                         //^
+            }
+        }
+    """
+    )
+
+    fun `test resolve type parameter for function value under result of`() = checkByCode(
+        """
+        module 0x1::config {
+            struct Version {}
+                 //X
+            public fun call<T>(t: T) {}
+        }
+        module 0x1::m {
+            use 0x1::config::{Self, Version};
+            fun main() {}
+            spec main {
+                ensures result_of<config::call<Version>>(Version {});
+                                              //^
+            }
+        }
+    """
+    )
+
     // todo: function values
 //    fun `test if there is non lambda function prioritize it over variables`() = checkByCode(
 //        """

@@ -989,6 +989,7 @@ private AtomExpr ::= AnnotatedExpr
                     | VectorLitExpr
                     | DotExpr
                     | IndexExpr
+                    | BehaviorPredicateExpr
                     | PathExpr
                     | CallExpr
                     | AssertMacroExpr
@@ -1178,6 +1179,16 @@ CallExpr ::= Expr !'!' ValueArgumentList {
 //        "org.move.lang.core.resolve.ref.InferenceCachedPathElement"
     ]
 }
+
+BehaviorPredicateExpr ::= <<specOnly behavior_predicate_ident>> TypeArgumentList ValueArgumentList {
+    pin = 1
+    implements = [
+        "org.move.lang.core.psi.ext.MvCallable"
+        "org.move.lang.core.psi.MslOnlyElement"
+    ]
+}
+private behavior_predicate_ident ::= <<behaviorPredicateIdent>>
+
 ValueArgumentList ::= '(' <<comma_separated_list ValueArgument>>? ')' {
     pin = 1
 }

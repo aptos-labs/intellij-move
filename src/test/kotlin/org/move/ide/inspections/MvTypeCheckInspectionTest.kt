@@ -16,6 +16,17 @@ module 0x1::M {
     """
     )
 
+    fun `test incorrect behavior predicate argument types`() = checkErrors(
+        """
+module 0x1::M {
+    fun params_2(val: u8, val2: u64) {}
+    spec module {
+        aborts_of<params_2>(<error descr="Incompatible type 'bool', expected 'num'">true</error>, <error descr="Incompatible type 'address', expected 'num'">@0x1</error>);
+    }
+} 
+    """
+    )
+
     fun `test incorrect type u8 passed where &signer is expected`() = checkErrors(
         """
 module 0x1::M {
@@ -1834,4 +1845,3 @@ module 0x1::pool {
         }
     """)
 }
-

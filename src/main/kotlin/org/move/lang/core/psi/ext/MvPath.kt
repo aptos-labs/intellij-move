@@ -94,6 +94,10 @@ fun MvPath.allowedNamespaces(isCompletion: Boolean = false): NsSet {
         parent is MvPathType
                 && parent.parent is MvIsExpr -> CONTAINER_TYPE_NS
 
+        // BEHAVIOR_PREDICATE_EXPR -> TYPE_ARGUMENT_LIST -> TYPE_ARGUMENT -> PATH_TYPE
+        parent is MvPathType
+                && parent.parent?.parent?.parent is MvBehaviorPredicateExpr -> CALLABLE_NS
+
         // a: bar
         //     ^
         parent is MvPathType && qualifier == null -> if (isCompletion) ITEM_TYPE_NS.add(MODULES) else ITEM_TYPE_NS

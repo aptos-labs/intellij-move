@@ -2,6 +2,7 @@ package org.move.lang.types
 
 import org.intellij.lang.annotations.Language
 import org.move.ide.presentation.text
+import org.move.lang.core.psi.MvBehaviorPredicateExpr
 import org.move.lang.core.psi.MvCallExpr
 import org.move.lang.core.psi.MvMethodCall
 import org.move.lang.core.psi.ext.MvCallable
@@ -75,8 +76,20 @@ class CallableTypeTest: TypificationTestCase() {
         }        
     """)
 
+    fun `test behavior predicate callable type`() = testBehaviorPredicateType("""
+        module 0x1::m {
+            fun call(val: u8, val2: u64): bool { true }
+            spec module {
+                aborts_of<call>(1, 2);
+              //^ fn(num, num) -> bool
+            }
+        }        
+    """)
+
     private fun testFunctionType(@Language("Move") code: String) = testCallableType<MvCallExpr>(code)
     private fun testMethodType(@Language("Move") code: String) = testCallableType<MvMethodCall>(code)
+    private fun testBehaviorPredicateType(@Language("Move") code: String) =
+        testCallableType<MvBehaviorPredicateExpr>(code)
 
     private inline fun <reified T: MvCallable> testCallableType(@Language("Move") code: String) {
         InlineFile(myFixture, code, "main.move")

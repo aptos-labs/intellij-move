@@ -39,6 +39,17 @@ class InlayParameterHintsTest: MvTestBase() {
     """
     )
 
+    fun `test behavior predicate`() = checkByText(
+        """
+        module 0x1::M {
+            native fun params_2(val: u8, val2: u64);
+            spec module {
+                aborts_of<params_2>(/*hint="val:"*/1, /*hint="val2:"*/2);
+            }
+        }    
+    """
+    )
+
     fun `test no hint for first argument of assert`() = checkByText(
         """
         module 0x1::M {
