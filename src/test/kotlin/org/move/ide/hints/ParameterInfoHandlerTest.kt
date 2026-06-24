@@ -66,6 +66,17 @@ class ParameterInfoHandlerTest:
     """, "a: u8, b: vector<u8>, c: vector<u8>", 2
     )
 
+    fun `test behavior predicate`() = checkByText(
+        """
+        module 0x1::M {
+            native fun params_2(val: u8, val2: u64);
+            spec module {
+                aborts_of<params_2>(/*caret*/);
+            }
+        }    
+    """, "val: num, val2: num", 0
+    )
+
     fun `test fun poorly formatted args`() = checkByText(
         """
         module 0x1::m {
