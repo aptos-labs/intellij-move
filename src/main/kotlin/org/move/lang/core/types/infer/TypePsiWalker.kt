@@ -331,7 +331,8 @@ class TypePsiWalker(
                 is MvStructLitExpr,
                 is MvPathExpr,
                 is MvDotExpr,
-                is MvCallExpr -> this.ctx.writeExprExpectedTy(expr, expectedTy)
+                is MvCallExpr,
+                is MvBehaviorPredicateExpr -> this.ctx.writeExprExpectedTy(expr, expectedTy)
             }
         }
 
@@ -339,6 +340,7 @@ class TypePsiWalker(
             is MvPathExpr -> inferPathExprTy(expr, expected)
             is MvBorrowExpr -> inferBorrowExprTy(expr, expected)
             is MvCallExpr -> inferCallExprTy(expr, expected)
+            is MvBehaviorPredicateExpr -> inferBehaviorPredicateExprTy(expr)
             is MvAssertMacroExpr -> inferAssertMacroExprTy(expr)
             is MvStructLitExpr -> inferStructLitExprTy(expr, expected)
             is MvVectorLitExpr -> inferVectorLitExpr(expr, expected)
@@ -556,6 +558,34 @@ class TypePsiWalker(
         writeCallableType(callExpr, callTy, method = false)
 
         return callTy.returnType
+    }
+
+    private fun inferBehaviorPredicateExprTy(bPredicate: MvBehaviorPredicateExpr): Ty {
+        val funPath = bPredicate.funPath
+        val item = funPath?.let { resolvePathCached(it, expectedType = null) }
+        val callTy =
+            when (item) {
+                is MvFunctionLike -> {
+                    instantiatePath<TyCallable>(funPath, item) ?: TyCallable.fake(
+                        bPredicate.valueArguments.size,
+                        CallKind.Function.fake(project)
+                    )
+                }
+                else -> TyCallable.fake(
+                    bPredicate.valueArguments.size,
+                    CallKind.Function.fake(project)
+                )
+            }
+
+        coerceArgumentTypes(
+            bPredicate.argumentExprs.map { CallArg.Arg(it) },
+            callTy.paramTypes,
+            emptyList(),
+        )
+
+        writeCallableType(bPredicate, callTy, method = false)
+
+        return TyBool
     }
 
     private fun instantiateAdtAsTyCallable(path: MvPath, tyAdt: TyAdt): TyCallable? {
@@ -1465,4 +1495,3 @@ private fun <T> TypeFoldable<T>.containsTyOfClass(classes: List<Class<*>>): Bool
         override fun visit(ty: Ty): Boolean =
             if (classes.any { it.isInstance(ty) }) true else ty.deepVisitWith(this)
     })
-

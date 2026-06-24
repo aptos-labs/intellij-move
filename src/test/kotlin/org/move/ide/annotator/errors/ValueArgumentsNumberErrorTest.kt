@@ -131,4 +131,15 @@ class ValueArgumentsNumberErrorTest: AnnotatorTestCase(MvErrorAnnotator::class) 
             }
         }
     """)
+
+    fun `test check behavior predicate arguments`() = checkErrors("""
+        module 0x1::main {
+            fun params_2(val: u8, val2: u64) {}
+            spec module {
+                aborts_of<params_2>(<error descr="This function takes 2 parameters but 0 parameters were supplied">)</error>;
+                aborts_of<params_2>(1, 2);
+                aborts_of<params_2>(1, 2, <error descr="This function takes 2 parameters but 3 parameters were supplied">3</error>);
+            }
+        }
+    """)
 }
