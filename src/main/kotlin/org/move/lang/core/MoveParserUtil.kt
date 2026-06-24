@@ -421,6 +421,18 @@ object MoveParserUtil: GeneratedParserUtilBase() {
     }
 
     @JvmStatic
+    fun behaviorPredicateIdent(b: PsiBuilder, level: Int): Boolean {
+        return (
+                nextTokenIs(b, "requires_of")
+                        || nextTokenIs(b, "aborts_of")
+                        || nextTokenIs(b, "ensures_of")
+                        || nextTokenIs(b, "result_of")
+                )
+                && b.lookAhead(1) == LT
+                && consumeToken(b, IDENTIFIER)
+    }
+
+    @JvmStatic
     fun addressKeyword(b: PsiBuilder, level: Int): Boolean = contextualKeyword(b, "address", ADDRESS)
 
     @JvmStatic
