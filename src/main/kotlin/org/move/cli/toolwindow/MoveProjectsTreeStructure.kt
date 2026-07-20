@@ -1,7 +1,7 @@
 package org.move.cli.toolwindow
 
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.runReadAction
+import com.intellij.openapi.application.runReadActionBlocking
 import com.intellij.ui.tree.AsyncTreeModel
 import com.intellij.ui.tree.StructureTreeModel
 import com.intellij.ui.treeStructure.CachingSimpleNode
@@ -123,7 +123,7 @@ class MoveProjectsTreeStructure(
             }
 
             override fun buildChildren(): Array<SimpleNode> = emptyArray()
-            override fun getName(): String = runReadAction { module.fqName()?.identifierText() ?: "null" }
+            override fun getName(): String = runReadActionBlocking { module.fqName()?.identifierText() ?: "null" }
             override fun toTestString(): String = "Module($name)"
         }
 
@@ -142,7 +142,7 @@ class MoveProjectsTreeStructure(
             }
 
             override fun buildChildren(): Array<SimpleNode> = emptyArray()
-            override fun getName(): String = runReadAction { function.fqName()?.identifierText() ?: "null" }
+            override fun getName(): String = runReadActionBlocking { function.fqName()?.identifierText() ?: "null" }
             override fun toTestString(): String = "Entrypoint($name)"
         }
 
@@ -161,7 +161,7 @@ class MoveProjectsTreeStructure(
             }
 
             override fun buildChildren(): Array<SimpleNode> = emptyArray()
-            override fun getName(): String = runReadAction { function.fqName()?.identifierText() ?: "null" }
+            override fun getName(): String = runReadActionBlocking { function.fqName()?.identifierText() ?: "null" }
             override fun toTestString(): String = "View($name)"
         }
     }

@@ -17,6 +17,7 @@ import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.runReadAction
+import com.intellij.openapi.application.runReadActionBlocking
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.progress.ProgressIndicator
@@ -131,7 +132,7 @@ class MoveProjectsSyncTask(
         context: SyncContext
     ) {
         var (moveProject, rootMoveToml) =
-            runReadAction {
+            runReadActionBlocking {
                 val tomlFile = moveTomlFile.toTomlFile(project)!!
                 val rootMoveToml = MoveToml.fromTomlFile(tomlFile)
                 val rootPackage = MovePackage.fromMoveToml(rootMoveToml, null)
@@ -144,7 +145,7 @@ class MoveProjectsSyncTask(
         val deps =
             (context.runWithChildProgress("Load dependencies") { childContext ->
                 // Blocks till completed or cancelled by the toml / file change
-                runReadAction {
+                runReadActionBlocking {
                     val rootPackage = moveProject.currentPackage
                     val deps = mutableListOf<MovePackageWithAddrSubst>()
                     val visitedDepIds = mutableSetOf(DepId(rootPackage.packageName))
