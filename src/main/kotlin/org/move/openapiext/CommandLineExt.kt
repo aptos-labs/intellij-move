@@ -12,6 +12,7 @@ import com.intellij.execution.process.ProcessOutput
 import com.intellij.notification.NotificationType.INFORMATION
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.runReadAction
+import com.intellij.openapi.application.runReadActionBlocking
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.util.CheckedDisposable
@@ -56,7 +57,7 @@ fun GeneralCommandLine.execute(
     }
 
     val ownerIsAlreadyDisposed =
-        runReadAction {
+        runReadActionBlocking {
             // check that owner is disposed, kill process then
             if (owner.isDisposed) {
                 true

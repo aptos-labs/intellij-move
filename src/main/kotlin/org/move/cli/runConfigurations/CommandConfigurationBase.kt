@@ -4,7 +4,6 @@ import com.intellij.execution.Executor
 import com.intellij.execution.configuration.EnvironmentVariablesData
 import com.intellij.execution.configurations.*
 import com.intellij.execution.runners.ExecutionEnvironment
-import com.intellij.openapi.options.advanced.AdvancedSettings
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.NlsContexts
@@ -14,8 +13,6 @@ import org.move.cli.readPath
 import org.move.cli.readString
 import org.move.cli.runConfigurations.CommandConfigurationBase.CleanConfiguration.Companion.configurationError
 import org.move.cli.runConfigurations.aptos.AptosArgs
-import org.move.cli.runConfigurations.test.AptosTestConsoleProperties.Companion.TEST_TOOL_WINDOW_SETTING_KEY
-import org.move.cli.runConfigurations.test.AptosTestRunState
 import org.move.cli.settings.aptosCliPath
 import org.move.cli.writePath
 import org.move.cli.writeString
@@ -63,11 +60,7 @@ abstract class CommandConfigurationBase(
         // todo: find shorter living disposable?
         Disposer.register(project.rootPluginDisposable, environment)
 
-        return if (showTestToolWindow(config.cmd)) {
-            AptosTestRunState(environment, config)
-        } else {
-            AptosRunState(environment, config)
-        }
+        return AptosRunState(environment, config)
     }
 
     fun validateConfiguration(): CleanConfiguration {
@@ -89,13 +82,6 @@ abstract class CommandConfigurationBase(
             )
         return CleanConfiguration.Ok(aptosPath, commandLine)
     }
-
-    protected fun showTestToolWindow(commandLine: AptosCommandLine): Boolean =
-        when {
-            !AdvancedSettings.getBoolean(TEST_TOOL_WINDOW_SETTING_KEY) -> false
-            commandLine.subCommand != "move test" -> false
-            else -> true
-        }
 
     sealed class CleanConfiguration {
         class Ok(val aptosPath: Path, val cmd: AptosCommandLine): CleanConfiguration()

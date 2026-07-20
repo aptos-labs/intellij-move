@@ -173,7 +173,7 @@ fun MessageBus.createDisposableOnAnyPsiChange(): CheckedDisposable {
 
 fun MutableList<HighlightInfo>.addHighlightsForFile(
     file: MoveFile,
-    annotationResult: RsExternalLinterResult,
+    linterResult: RsExternalLinterResult,
 ) {
     val document = file.viewProvider.document
         ?: error("Can't find document for $file in external linter")
@@ -183,9 +183,9 @@ fun MutableList<HighlightInfo>.addHighlightsForFile(
 
     val compilerErrors =
         if (project.isCompilerJsonOutputEnabled) {
-            annotationResult.jsonCompilerErrors
+            linterResult.jsonCompilerErrors
         } else {
-            annotationResult.humanCompilerErrors
+            linterResult.humanCompilerErrors
                 .mapNotNull { it.toJsonError(file, document) }
         }
             .mapNotNull { filterMessage(file, it, skipIdeErrors) }
@@ -224,8 +224,8 @@ class RsExternalLinterResult(
 private data class RsExternalLinterFilteredMessage(
     val severity: HighlightSeverity,
     val textRange: TextRange,
-    @Nls val message: String,
-    @Nls val htmlTooltip: String,
+    @param:Nls val message: String,
+    @param:Nls val htmlTooltip: String,
 ) {
     companion object {
         private val LOG = logger<RsExternalLinterFilteredMessage>()
@@ -293,9 +293,6 @@ private data class RsExternalLinterFilteredMessage(
                 primaryTextRange,
                 compilerError.message.capitalized(),
                 tooltip,
-//                compilerError.code?.let {  }
-//                message.code?.code?.let { RsLint.ExternalLinterLint(it) },
-//                message.collectQuickFixes(file, document)
             )
         }
     }

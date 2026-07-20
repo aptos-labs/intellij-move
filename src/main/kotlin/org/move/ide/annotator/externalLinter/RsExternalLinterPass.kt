@@ -8,17 +8,15 @@ package org.move.ide.annotator.externalLinter
 import com.intellij.codeHighlighting.DirtyScopeTrackingHighlightingPassFactory
 import com.intellij.codeHighlighting.TextEditorHighlightingPass
 import com.intellij.codeHighlighting.TextEditorHighlightingPassRegistrar
-import com.intellij.codeInsight.daemon.impl.BackgroundUpdateHighlightersUtil
 import com.intellij.codeInsight.daemon.impl.DaemonCodeAnalyzerEx
 import com.intellij.codeInsight.daemon.impl.FileStatusMap
 import com.intellij.codeInsight.daemon.impl.HighlightInfo
 import com.intellij.codeInsight.daemon.impl.UpdateHighlightersUtil
-import com.intellij.codeInsight.highlighting.BackgroundHighlightingUtil
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ModalityState
-import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.application.runReadAction
+import com.intellij.openapi.application.runReadActionBlocking
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.diagnostic.logger
@@ -53,7 +51,7 @@ class RsExternalLinterPass(
 
     @Volatile
     private var annotationInfo: Lazy<RsExternalLinterResult?>? = null
-    private val annotationResult: RsExternalLinterResult? get() = annotationInfo?.value
+    private val linterResult: RsExternalLinterResult? get() = annotationInfo?.value
 
     @Volatile
     private var disposable: CheckedDisposable = createProjectDisposable()
@@ -65,7 +63,8 @@ class RsExternalLinterPass(
         val moveProject = file.findMoveProject() ?: return
 
         val moduleOrProject: Disposable = ModuleUtil.findModuleForFile(file) ?: myProject
-        disposable = myProject.messageBus.createDisposableOnAnyPsiChange()
+        disposable = myProject.messageBus
+            .createDisposableOnAnyPsiChange()
             .also { Disposer.register(moduleOrProject, it) }
 
         val aptos = myProject.getAptosCli(parentDisposable = disposable) ?: return
@@ -83,54 +82,54 @@ class RsExternalLinterPass(
 
         if (annotationInfo == null || !isAnnotationPassEnabled) {
             disposable = createProjectDisposable()
-            doFinish(emptyList())
+            applyHighlightsOnEdt(emptyList())
             return
         }
 
-        class RsUpdate: Update(file) {
-            val updateFile: MoveFile = file
+        class ExternalLintsUpdate: Update(file) {
+            val updatedFile: MoveFile = file
 
             override fun setRejected() {
                 super.setRejected()
-                doFinish(highlights)
+                applyHighlightsOnEdt(highlights)
             }
 
             override fun run() {
                 BackgroundTaskUtil.runUnderDisposeAwareIndicator(disposable, Runnable {
-                    val annotationResult = annotationResult ?: return@Runnable
+                    val linterResult = this@RsExternalLinterPass.linterResult ?: return@Runnable
+                    // reports execution time if it exceeds LINTER_MAX_EXECUTION_TIME
                     myProject.service<RsExternalLinterSlowRunNotifier>()
-                        .reportExecutionTime(annotationResult.executionTime)
-                    runReadAction {
+                        .reportExecutionTime(linterResult.executionTime)
+                    runReadActionBlocking {
                         ProgressManager.checkCanceled()
-                        doApply(annotationResult)
+                        if (updatedFile.isValid) {
+                            try {
+                                highlights.addHighlightsForFile(updatedFile, linterResult)
+                            } catch (t: Throwable) {
+                                if (t is ProcessCanceledException) throw t
+                                LOG.error(t)
+                            }
+                        }
                         ProgressManager.checkCanceled()
-                        doFinish(highlights)
+                        applyHighlightsOnEdt(highlights)
                     }
                 })
             }
 
-            override fun canEat(update: Update): Boolean = updateFile == (update as? RsUpdate)?.updateFile
+            override fun canEat(update: Update): Boolean =
+                updatedFile == (update as? ExternalLintsUpdate)?.updatedFile
         }
 
-        val update = RsUpdate()
+        val lintsUpdate = ExternalLintsUpdate()
         if (isUnitTestMode) {
-            update.run()
+            lintsUpdate.run()
         } else {
-            factory.scheduleExternalActivity(update)
+            factory.scheduleExternalActivity(lintsUpdate)
         }
     }
 
-    private fun doApply(annotationResult: RsExternalLinterResult) {
-        if (file !is MoveFile || !file.isValid) return
-        try {
-            highlights.addHighlightsForFile(file, annotationResult)
-        } catch (t: Throwable) {
-            if (t is ProcessCanceledException) throw t
-            LOG.error(t)
-        }
-    }
-
-    private fun doFinish(highlights: List<HighlightInfo>) {
+    private fun applyHighlightsOnEdt(highlights: List<HighlightInfo>) {
+        // schedules runnable to run in EDT later
         runInEdt(ModalityState.stateForComponent(editor.component)) {
             if (disposable.isDisposed) return@runInEdt
             UpdateHighlightersUtil.setHighlightersToEditor(

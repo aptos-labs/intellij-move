@@ -1,6 +1,7 @@
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
+import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
@@ -30,16 +31,14 @@ version = pluginVersion
 plugins {
     id("java")
     kotlin("jvm") version "2.4.0"
-    id("org.jetbrains.intellij.platform") version "2.13.1"
-    id("org.jetbrains.intellij.platform.grammarkit") version "2.13.1"
-//    id("org.jetbrains.grammarkit") version "2023.3.0.3"
+    id("org.jetbrains.intellij.platform") version "2.18.1"
+    id("org.jetbrains.intellij.platform.grammarkit") version "2.18.1"
     id("net.saliman.properties") version "1.6.0"
 }
 
 allprojects {
     apply {
         plugin("kotlin")
-//        plugin("org.jetbrains.grammarkit")
         plugin("org.jetbrains.intellij.platform")
         plugin("org.jetbrains.intellij.platform.grammarkit")
     }
@@ -70,16 +69,16 @@ allprojects {
             create(prop("platformType"), prop("platformVersion")) {
                 this.useInstaller = createUseInstaller
             }
-//            if (isLocal) {
-//                local("/snap/rustrover/current")
-//            } else {
-//            }
 
             pluginVerifier(Constraints.LATEST_VERSION)
             bundledPlugin("org.toml.lang")
             jetbrainsRuntime()
 
             testFramework(TestFrameworkType.Platform)
+
+            if (shortPlatformVersion.toInt() >= 262) {
+                testBundledPlugin("intellij.structureView.plugin")
+            }
         }
     }
 
@@ -90,7 +89,11 @@ allprojects {
     }
 
     kotlin {
-        jvmToolchain(21)
+        if (shortPlatformVersion == "262") {
+            jvmToolchain(25)
+        } else {
+            jvmToolchain(21)
+        }
         if (file("src/$shortPlatformVersion/main/kotlin").exists()) {
             sourceSets {
                 main {
@@ -139,11 +142,10 @@ allprojects {
         }
         compileKotlin {
             compilerOptions {
-                freeCompilerArgs.add("-Xjvm-default=all")
-                val kotlinVersion =
-                    if (shortPlatformVersion == "253") KotlinVersion.KOTLIN_2_2 else KotlinVersion.KOTLIN_2_3
-                languageVersion.set(kotlinVersion)
-                apiVersion.set(kotlinVersion)
+                jvmDefault.set(JvmDefaultMode.NO_COMPATIBILITY)
+
+                languageVersion.set(KotlinVersion.KOTLIN_2_4)
+                apiVersion.set(KotlinVersion.KOTLIN_2_4)
             }
         }
 
@@ -169,8 +171,7 @@ allprojects {
         }
     }
 
-    @Suppress("unused")
-    val runIdeWithPlugins by intellijPlatformTesting.runIde.registering {
+    intellijPlatformTesting.runIde.register("runIdeWithPlugins") {
         plugins {
             plugin("com.google.ide-perf:1.3.2")
 //            plugin("PsiViewer:PsiViewer 241.14494.158-EAP-SNAPSHOT")

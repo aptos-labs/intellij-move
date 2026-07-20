@@ -8,7 +8,11 @@ jobs:
     publish-release:
         strategy:
             matrix:
-                gradle-properties-version: [ 253, 261 ]
+                include:
+                - gradle-properties-version: 261
+                  java-version: 21
+                - gradle-properties-version: 262
+                  java-version: 25
 
         runs-on: ubuntu-latest
         env:
@@ -18,11 +22,11 @@ jobs:
         steps:
             -   uses: actions/checkout@v6
 
-            -   name: Set up JDK 21
+            -   name: Set up JDK
                 uses: actions/setup-java@v5
                 with:
                     distribution: 'corretto'
-                    java-version: 21
+                    java-version: ${{ matrix.java-version }}
 
             -   name: Setup Gradle
                 uses: gradle/actions/setup-gradle@v6

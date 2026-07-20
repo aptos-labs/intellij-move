@@ -30,7 +30,6 @@ fun getFieldLookupResolveVariants(receiverItem: MvStructOrEnumItemElement): List
                     // add variant fields to the global fields list to skip them in the next variants
                     visitedFields.addAll(visitedVariantFields)
                 }
-                false
             }
         }
     }
