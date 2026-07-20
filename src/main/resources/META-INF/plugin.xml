@@ -425,12 +425,6 @@
                  description="Force-disable support for pre-compiled bundled Aptos CLI (imitate MacOS)" />
 
     <advancedSetting
-        id="org.move.aptos.test.tool.window"
-        default="false"
-        groupKey="advanced.setting.aptos.group"
-        descriptionKey="advanced.setting.org.move.aptos.test.tool.window.description"
-    />
-    <advancedSetting
         id="org.move.aptos.compile.message.json"
         default="true"
         groupKey="advanced.setting.aptos.group"
