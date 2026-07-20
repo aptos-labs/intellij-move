@@ -30,16 +30,14 @@ version = pluginVersion
 plugins {
     id("java")
     kotlin("jvm") version "2.4.0"
-    id("org.jetbrains.intellij.platform") version "2.13.1"
-    id("org.jetbrains.intellij.platform.grammarkit") version "2.13.1"
-//    id("org.jetbrains.grammarkit") version "2023.3.0.3"
+    id("org.jetbrains.intellij.platform") version "2.18.1"
+    id("org.jetbrains.intellij.platform.grammarkit") version "2.18.1"
     id("net.saliman.properties") version "1.6.0"
 }
 
 allprojects {
     apply {
         plugin("kotlin")
-//        plugin("org.jetbrains.grammarkit")
         plugin("org.jetbrains.intellij.platform")
         plugin("org.jetbrains.intellij.platform.grammarkit")
     }
@@ -169,8 +167,7 @@ allprojects {
         }
     }
 
-    @Suppress("unused")
-    val runIdeWithPlugins by intellijPlatformTesting.runIde.registering {
+    intellijPlatformTesting.runIde.register("runIdeWithPlugins") {
         plugins {
             plugin("com.google.ide-perf:1.3.2")
 //            plugin("PsiViewer:PsiViewer 241.14494.158-EAP-SNAPSHOT")
