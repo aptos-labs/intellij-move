@@ -88,7 +88,11 @@ allprojects {
     }
 
     kotlin {
-        jvmToolchain(21)
+        if (shortPlatformVersion == "262") {
+            jvmToolchain(25)
+        } else {
+            jvmToolchain(21)
+        }
         if (file("src/$shortPlatformVersion/main/kotlin").exists()) {
             sourceSets {
                 main {

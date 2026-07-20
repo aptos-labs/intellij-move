@@ -2,6 +2,7 @@ package org.move.lang.completion.lookups
 
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.CompletionSorter
+import com.intellij.codeInsight.completion.PlainPrefixMatcher
 import com.intellij.codeInsight.completion.PrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementPresentation
@@ -218,7 +219,7 @@ class LookupElementTest: MvTestBase() {
         val element = findElementInEditor<MvReferenceElement>()
 
         val lookups = mutableListOf<LookupElement>()
-        val result = object: CompletionResultSet(PrefixMatcher.ALWAYS_TRUE, { _ -> }, null) {
+        val result = object: CompletionResultSet(PlainPrefixMatcher.ALWAYS_TRUE, { _ -> }, null) {
             override fun caseInsensitive(): CompletionResultSet = this
             override fun withPrefixMatcher(matcher: PrefixMatcher): CompletionResultSet = this
             override fun withPrefixMatcher(prefix: String): CompletionResultSet = this
