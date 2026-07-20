@@ -69,16 +69,16 @@ allprojects {
             create(prop("platformType"), prop("platformVersion")) {
                 this.useInstaller = createUseInstaller
             }
-//            if (isLocal) {
-//                local("/snap/rustrover/current")
-//            } else {
-//            }
 
             pluginVerifier(Constraints.LATEST_VERSION)
             bundledPlugin("org.toml.lang")
             jetbrainsRuntime()
 
             testFramework(TestFrameworkType.Platform)
+
+            if (shortPlatformVersion.toInt() >= 262) {
+                testBundledPlugin("intellij.structureView.plugin")
+            }
         }
     }
 
