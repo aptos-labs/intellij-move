@@ -1,6 +1,7 @@
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
+import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
@@ -141,11 +142,10 @@ allprojects {
         }
         compileKotlin {
             compilerOptions {
-                freeCompilerArgs.add("-Xjvm-default=all")
-                val kotlinVersion =
-                    if (shortPlatformVersion == "253") KotlinVersion.KOTLIN_2_2 else KotlinVersion.KOTLIN_2_3
-                languageVersion.set(kotlinVersion)
-                apiVersion.set(kotlinVersion)
+                jvmDefault.set(JvmDefaultMode.NO_COMPATIBILITY)
+
+                languageVersion.set(KotlinVersion.KOTLIN_2_4)
+                apiVersion.set(KotlinVersion.KOTLIN_2_4)
             }
         }
 
