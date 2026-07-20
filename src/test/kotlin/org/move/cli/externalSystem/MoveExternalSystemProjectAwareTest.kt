@@ -31,7 +31,10 @@ class MoveExternalSystemProjectAwareTest: MvProjectTestBase() {
 
     override fun setUp() {
         super.setUp()
-        AutoImportProjectTracker.enableAutoReloadInTests(testRootDisposable)
+//        - reload: allow this synchronization when explicitly requested.
+//        - autoReload: automatically perform that synchronization after detecting a Move.toml change.
+//        - Without auto-reload: IntelliJ records that the project is stale and shows a notification, waiting for an explicit reload.
+        AutoImportProjectTracker.enableReloadInTests(testRootDisposable)
     }
 
     // RustRover does not work due to extra call to reloadProject() after the modification of Move.toml,
@@ -199,18 +202,20 @@ class MoveExternalSystemProjectAwareTest: MvProjectTestBase() {
     private fun TestProject.checkFileModification(path: String, triggered: Boolean) {
         val file = file(path)
         val initialText = VfsUtil.loadText(file)
-        checkModification("modifying of", path, triggered,
-                          apply = { VfsUtil.saveText(file, "$initialText\nsome text") },
-                          revert = { VfsUtil.saveText(file, initialText) }
+        checkModification(
+            "modifying of", path, triggered,
+            apply = { VfsUtil.saveText(file, "$initialText\nsome text") },
+            revert = { VfsUtil.saveText(file, initialText) }
         )
     }
 
     private fun TestProject.checkFileDeletion(path: String, triggered: Boolean) {
         val file = file(path)
         val initialText = VfsUtil.loadText(file)
-        checkModification("removing of ", path, triggered,
-                          apply = { file.delete(file.fileSystem) },
-                          revert = { createFile(rootDirectory, path, initialText) }
+        checkModification(
+            "removing of ", path, triggered,
+            apply = { file.delete(file.fileSystem) },
+            revert = { createFile(rootDirectory, path, initialText) }
         )
     }
 
