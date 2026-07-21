@@ -31,6 +31,9 @@ jobs:
             -   name: Setup Gradle
                 uses: gradle/actions/setup-gradle@v6
 
+            -   name: Regenerate lexer and parser
+                run: ./gradlew generateLexer generateParser --rerun-tasks --stacktrace
+
             -   name: Publish plugin
                 run: ./gradlew publishPlugin --stacktrace -Pkotlin.incremental=false
 
