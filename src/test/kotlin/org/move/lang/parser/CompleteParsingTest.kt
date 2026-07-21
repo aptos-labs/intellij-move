@@ -83,6 +83,8 @@ class CompleteParsingTest: MvParsingTestCase("complete") {
     fun `test split`() = doTest()
     fun `test spec weights`() = doTest()
 
+    fun `test lambda type abilities`() = doTest()
+
     fun doTest() {
         super.doTest(true, true)
     }

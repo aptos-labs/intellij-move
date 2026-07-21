@@ -632,7 +632,11 @@ PathType ::= PathImpl
 
 TupleType ::= '(' Type ',' (Type ','?)* ')' { pin = 3 }
 
-LambdaType ::= '|' !',' <<comma_separated_list LambdaTypeParam>>? '|' Type? LambdaTypeAbilityList?
+LambdaType ::= '|' !',' <<comma_separated_list LambdaTypeParam>>? '|'
+                    LambdaType_return_type?
+                    LambdaTypeAbilityList?
+private LambdaType_return_type ::= !has Type
+
 LambdaTypeParam ::= Type
 LambdaTypeAbilityList ::= has TypeParamBound_items
 
