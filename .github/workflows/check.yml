@@ -55,7 +55,7 @@ jobs:
                 run: ./gradlew verifyPluginConfiguration
 
             -   name: Verify plugin
-                if: ${{ matrix.platform-type == 'PY' }}
+                if: ${{ matrix.platform-type == 'PY' || matrix.platform-type == 'IU' }}
                 run: ./gradlew verifyPlugin
 
 

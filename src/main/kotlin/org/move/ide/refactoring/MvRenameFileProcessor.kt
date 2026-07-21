@@ -1,6 +1,5 @@
 package org.move.ide.refactoring
 
-import com.intellij.lang.LangBundle
 import com.intellij.lang.LanguageNamesValidation
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.options.ConfigurationException
@@ -16,14 +15,14 @@ import org.move.lang.MoveLanguage
 import org.move.lang.core.psi.MvModule
 import org.move.lang.core.psi.rename
 
-class MvRenameFileProcessor : RenamePsiFileProcessor() {
+class MvRenameFileProcessor: RenamePsiFileProcessor() {
     override fun createRenameDialog(
         project: Project,
         element: PsiElement,
         nameSuggestionContext: PsiElement?,
         editor: Editor?
     ): RenameDialog {
-        return object : PsiFileRenameDialog(project, element, nameSuggestionContext, editor) {
+        return object: PsiFileRenameDialog(project, element, nameSuggestionContext, editor) {
             override fun canRun() {
                 super.canRun()
                 val moveFile = element as? MoveFile ?: return
@@ -33,12 +32,7 @@ class MvRenameFileProcessor : RenamePsiFileProcessor() {
                     if (namesValidator.isKeyword(newModuleName, moveFile.project)
                         || !namesValidator.isIdentifier(newModuleName, moveFile.project)
                     ) {
-                        throw ConfigurationException(
-                            LangBundle.message(
-                                "dialog.message.valid.identifier",
-                                newName
-                            )
-                        )
+                        throw ConfigurationException("\"$newName\" is not a valid identifier")
                     }
                 }
             }
