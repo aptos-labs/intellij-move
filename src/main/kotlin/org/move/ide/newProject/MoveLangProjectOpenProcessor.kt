@@ -31,7 +31,6 @@ class MoveLangProjectOpenProcessor: ProjectOpenProcessor() {
     ): Project? {
         val platformOpenProcessor = PlatformProjectOpenProcessor.getInstance()
         val basedir = if (virtualFile.isDirectory) virtualFile else virtualFile.parent
-        @Suppress("UnstableApiUsage")
         return platformOpenProcessor.openProjectAsync(basedir, projectToClose, forceOpenInNewFrame)
             ?.also { project ->
                 @Suppress("DEPRECATION")
