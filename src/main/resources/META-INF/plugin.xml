@@ -401,7 +401,7 @@
       <category>Move</category>
     </intentionAction>
 
-    <errorHandler implementation="org.move.cli.sentryReporter.SentryErrorReporter" />
+    <errorHandler implementation="com.intellij.diagnostic.JetBrainsMarketplaceErrorReportSubmitter"/>
 
     <registryKey key="org.move.debug.enabled"
                  defaultValue="false"
